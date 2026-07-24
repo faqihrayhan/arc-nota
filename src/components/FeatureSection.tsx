@@ -37,7 +37,6 @@ export function FeatureSection() {
     {
       id: "payment",
       ply: "bg-paper-white",
-      plyLabel: t("features.payment.ply"),
       title: t("features.payment.title"),
       description: t("features.payment.desc"),
       iconColor: "text-paper-ink",
@@ -46,7 +45,6 @@ export function FeatureSection() {
     {
       id: "analisa",
       ply: "bg-paper-pink",
-      plyLabel: t("features.analisa.ply"),
       title: t("features.analisa.title"),
       description: t("features.analisa.desc"),
       iconColor: "text-pink-400",
@@ -55,7 +53,6 @@ export function FeatureSection() {
     {
       id: "forecast",
       ply: "bg-paper-yellow",
-      plyLabel: t("features.forecast.ply"),
       title: t("features.forecast.title"),
       description: t("features.forecast.desc"),
       iconColor: "text-amber-400",
@@ -95,7 +92,6 @@ export function FeatureSection() {
                 <div className={cn("absolute -right-20 -top-20 h-40 w-40 rounded-full blur-[60px] transition-opacity duration-500 opacity-0 group-hover:opacity-100", f.bgGlow)} />
                 <div className="relative p-7">
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-[11px] uppercase tracking-wider text-text-faint">{f.plyLabel}</span>
                     <span className="rounded-full border border-ink-line/40 bg-ink-2/60 px-2.5 py-0.5 text-[10px] font-medium text-text-faint">{t("features.comingSoon")}</span>
                   </div>
                   <div className="mt-6 flex h-12 w-12 items-center justify-center rounded-xl bg-ink-2 border border-ink-line/30 transition-all duration-300 group-hover:scale-110 group-hover:border-ink-line/50">

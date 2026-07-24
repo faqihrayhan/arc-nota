@@ -6,13 +6,10 @@ export const localeLabels: Record<Locale, string> = {
   en: "English",
 };
 
-// Flat dot-path keys are easier to grep/refactor than deep nesting when
-// the app is still small. Split this into per-feature files if it grows.
 export const dictionaries: Record<Locale, Record<string, string>> = {
   id: {
-    "nav.payment": "Payment",
-    "nav.analisa": "Analisa Keuangan",
-    "nav.forecast": "Forecast",
+    "nav.payment": "How It Works",
+    "nav.analisa": "Products",
 
     "hero.badge": "Built on Arc · Testnet",
     "hero.title1": "Tiap transaksi jadi nota.",
@@ -33,7 +30,7 @@ export const dictionaries: Record<Locale, Record<string, string>> = {
       "Satu transaksi menghasilkan tiga hal sekaligus: bukti bayar, data untuk dianalisa, dan bahan buat proyeksi ke depan.",
     "features.comingSoon": "Segera hadir",
     "features.payment.ply": "Lembar putih",
-    "features.payment.title": "Payment",
+    "features.payment.title": "Pembayaran",
     "features.payment.desc":
       "Tampilkan QR pembayaranmu untuk discan kasir. Setiap transaksi otomatis tercatat sebagai nota on-chain di Arc — gak perlu input manual.",
     "features.analisa.ply": "Lembar merah muda",
@@ -41,7 +38,7 @@ export const dictionaries: Record<Locale, Record<string, string>> = {
     "features.analisa.desc":
       "Semua nota dari fitur Payment dikelompokkan otomatis per kategori, biar kamu bisa lihat ke mana saja uangmu pergi bulan ini.",
     "features.forecast.ply": "Lembar kuning",
-    "features.forecast.title": "Forecast",
+    "features.forecast.title": "Ramalan",
     "features.forecast.desc":
       "Berdasarkan pola pengeluaran dari Analisa Keuangan, Nota memproyeksikan perkiraan pengeluaranmu bulan depan.",
 
@@ -57,16 +54,33 @@ export const dictionaries: Record<Locale, Record<string, string>> = {
     "wallet.disconnect": "Putuskan koneksi",
     "wallet.switchNetwork": "Ganti ke Arc Testnet",
 
-    "footer.builtOn": "Built on Arc.",
+    // ===== FOOTER KEYS BARU =====
+
+    "footer.tagline" : "Tiap transaksi jadi nota, Tiap nota jadi wawasan.",
+    "footer.product": "Produk",
+    "footer.resources": "Sumber Daya",
+    "footer.community": "Komunitas",
+    "footer.payment": "Payment",
+    "footer.finance": "Keuangan",
+    "footer.forecast": "Forecast",
+    "footer.docs": "Dokumentasi",
+    "footer.api": "Referensi API",
+    "footer.whitepaper": "Whitepaper",
+    "footer.arcDocs": "Arc Docs",
+    "footer.arcScan": "Arc Scan",
+    "footer.faucet": "Faucet",
+    "footer.discord": "Discord",
+    "footer.twitter": "Twitter",
+    "footer.github": "GitHub",
+    "footer.builtOn": "Built on Arc Testnet.",
     "footer.disclaimer": "Berjalan di Arc Testnet — token dan transaksi tidak bernilai nyata.",
 
     "theme.toggle": "Ganti tampilan",
     "lang.toggle": "Ganti bahasa",
   },
   en: {
-    "nav.payment": "Payment",
-    "nav.analisa": "Insights",
-    "nav.forecast": "Forecast",
+    "nav.payment": "How It Works",
+    "nav.analisa": "Products",
 
     "hero.badge": "Built on Arc · Testnet",
     "hero.title1": "Every purchase becomes a note.",
@@ -91,11 +105,11 @@ export const dictionaries: Record<Locale, Record<string, string>> = {
     "features.payment.desc":
       "Show your payment QR for the cashier to scan. Every transaction is automatically logged as an on-chain note on Arc — no manual entry needed.",
     "features.analisa.ply": "Pink sheet",
-    "features.analisa.title": "Insights",
+    "features.analisa.title": "Financial Analysis",
     "features.analisa.desc":
       "Every note from Payment gets grouped into categories automatically, so you can see exactly where your money went this month.",
     "features.forecast.ply": "Yellow sheet",
-    "features.forecast.title": "Forecast",
+    "features.forecast.title": "Forecasting",
     "features.forecast.desc":
       "Based on the spending patterns from Insights, Nota projects an estimate of what you'll spend next month.",
 
@@ -111,7 +125,24 @@ export const dictionaries: Record<Locale, Record<string, string>> = {
     "wallet.disconnect": "Disconnect",
     "wallet.switchNetwork": "Switch to Arc Testnet",
 
-    "footer.builtOn": "Built on Arc.",
+    // ===== FOOTER KEYS BARU =====
+    "footer.tagline" : "Every Transacton Becomes a Notes, Every Note Becomes An Insight",
+    "footer.product": "Product",
+    "footer.resources": "Resources",
+    "footer.community": "Community",
+    "footer.payment": "Payment",
+    "footer.finance": "Finance",
+    "footer.forecast": "Forecast",
+    "footer.docs": "Documentation",
+    "footer.api": "API Reference",
+    "footer.whitepaper": "Whitepaper",
+    "footer.arcDocs": "Arc Docs",
+    "footer.arcScan": "Arc Scan",
+    "footer.faucet": "Faucet",
+    "footer.discord": "Discord",
+    "footer.twitter": "Twitter",
+    "footer.github": "GitHub",
+    "footer.builtOn": "Built on Arc Testnet.",
     "footer.disclaimer": "Running on Arc Testnet — tokens and transactions have no real value.",
 
     "theme.toggle": "Toggle theme",

@@ -31,7 +31,7 @@ export function Nav() {
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
-      const sections = ["payment", "analisa", "forecast"];
+      const sections = ["payment", "analisa"];
       let current = "";
       for (const id of sections) {
         const el = document.getElementById(id);
@@ -50,7 +50,6 @@ export function Nav() {
   const links = [
     { href: "#payment", label: t("nav.payment"), id: "payment" },
     { href: "#analisa", label: t("nav.analisa"), id: "analisa" },
-    { href: "#forecast", label: t("nav.forecast"), id: "forecast" },
   ];
 
   const docsItems = [
