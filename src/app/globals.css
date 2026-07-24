@@ -1,11 +1,17 @@
 @import "tailwindcss";
 
-/* Dark is the default brand look — ink background, warm paper accents */
+/* ============================================================
+   NOTA — Design System (v2.0)
+   Dark is the default brand look — ink background, warm paper accents
+   ============================================================ */
+
 :root,
 .dark {
   --ink: #0e1412;
   --ink-2: #161f1b;
+  --ink-3: #1c2823;
   --ink-line: #2a332e;
+  --ink-line-subtle: #1f2a25;
 
   --paper-white: #efeadb;
   --paper-pink: #f0d3d6;
@@ -14,19 +20,44 @@
 
   --accent: #4e7fe0;
   --accent-strong: #3a63c4;
+  --accent-glow: rgba(78, 127, 224, 0.15);
   --stamp-green: #4c9a6a;
   --warn-amber: #d98c3b;
 
   --text: #ede7da;
   --text-muted: #98a19a;
+  --text-faint: #5b6355;
+
+  /* shadcn-compatible aliases */
+  --background: var(--ink);
+  --foreground: var(--text);
+  --card: var(--ink-2);
+  --card-foreground: var(--text);
+  --popover: var(--ink-2);
+  --popover-foreground: var(--text);
+  --primary: var(--accent);
+  --primary-foreground: #ffffff;
+  --secondary: var(--ink-3);
+  --secondary-foreground: var(--text);
+  --muted: var(--ink-3);
+  --muted-foreground: var(--text-muted);
+  --accent-shadcn: var(--ink-3);
+  --accent-foreground: var(--text);
+  --destructive: #c45c5c;
+  --destructive-foreground: #ffffff;
+  --border: var(--ink-line);
+  --input: var(--ink-line);
+  --ring: var(--accent);
+  --radius: 0.625rem;
 }
 
-/* Light mode: same "ledger paper" family, just flipped — not a generic
-   template light theme, it's the same paper the dark mode is printed on */
+/* Light mode: same "ledger paper" family, just flipped */
 .light {
   --ink: #eef0e6;
   --ink-2: #e3e6d9;
+  --ink-3: #d8dccf;
   --ink-line: #c9cfbd;
+  --ink-line-subtle: #dde1d5;
 
   --paper-white: #fbf9f2;
   --paper-pink: #f6dde0;
@@ -35,39 +66,101 @@
 
   --accent: #3f6fd1;
   --accent-strong: #2f57ab;
+  --accent-glow: rgba(63, 111, 209, 0.12);
   --stamp-green: #3f8259;
   --warn-amber: #a8641f;
 
   --text: #1c2119;
   --text-muted: #5b6355;
+  --text-faint: #8a9280;
+
+  --background: var(--ink);
+  --foreground: var(--text);
+  --card: var(--ink-2);
+  --card-foreground: var(--text);
+  --popover: var(--ink-2);
+  --popover-foreground: var(--text);
+  --primary: var(--accent);
+  --primary-foreground: #ffffff;
+  --secondary: var(--ink-3);
+  --secondary-foreground: var(--text);
+  --muted: var(--ink-3);
+  --muted-foreground: var(--text-muted);
+  --accent-shadcn: var(--ink-3);
+  --accent-foreground: var(--text);
+  --destructive: #b54a4a;
+  --destructive-foreground: #ffffff;
+  --border: var(--ink-line);
+  --input: var(--ink-line);
+  --ring: var(--accent);
 }
 
 @theme inline {
   --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
   --color-ink-line: var(--ink-line);
+  --color-ink-line-subtle: var(--ink-line-subtle);
   --color-paper-white: var(--paper-white);
   --color-paper-pink: var(--paper-pink);
   --color-paper-yellow: var(--paper-yellow);
   --color-paper-ink: var(--paper-ink);
   --color-accent: var(--accent);
   --color-accent-strong: var(--accent-strong);
+  --color-accent-glow: var(--accent-glow);
   --color-stamp-green: var(--stamp-green);
   --color-warn-amber: var(--warn-amber);
   --color-text: var(--text);
   --color-text-muted: var(--text-muted);
+  --color-text-faint: var(--text-faint);
+
+  /* shadcn theme tokens */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent-shadcn: var(--accent-shadcn);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 
   --font-display: "Space Grotesk", sans-serif;
   --font-sans: "IBM Plex Sans", sans-serif;
   --font-mono: "IBM Plex Mono", monospace;
+
+  /* Animation tokens */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-circ: cubic-bezier(0.85, 0, 0.15, 1);
+  --ease-elastic: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --duration-micro: 150ms;
+  --duration-base: 300ms;
+  --duration-emphasis: 500ms;
+  --duration-dramatic: 800ms;
 }
 
 * {
   scrollbar-color: var(--ink-line) var(--ink);
+  scrollbar-width: thin;
 }
 
 html {
   color-scheme: dark;
+  scroll-behavior: smooth;
 }
 html.light {
   color-scheme: light;
@@ -77,7 +170,37 @@ body {
   background: var(--ink);
   color: var(--text);
   font-family: var(--font-sans);
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Selection */
+::selection {
+  background: var(--accent-glow);
+  color: var(--text);
+}
+
+/* Focus visible */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Custom scrollbar for webkit */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--ink);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--ink-line);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
 @media (prefers-reduced-motion: reduce) {

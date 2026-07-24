@@ -4,6 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import { useWallet, type WalletId } from "@/context/WalletContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { ARC_EXPLORER_URL } from "@/lib/arc-chain";
+import { cn } from "@/lib/utils";
+import {
+  Wallet,
+  ChevronDown,
+  ExternalLink,
+  LogOut,
+  AlertTriangle,
+  Loader2,
+} from "lucide-react";
 
 const WALLETS: { id: WalletId; label: string; monogram: string }[] = [
   { id: "metamask", label: "MetaMask", monogram: "MM" },
@@ -13,6 +22,15 @@ const WALLETS: { id: WalletId; label: string; monogram: string }[] = [
 function shortAddress(addr: string) {
   return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
 }
+
+/* ============================================================
+   WALLET BUTTON — Nota v2.0
+   Features:
+   - Enhanced dropdown with icons
+   - Status indicators
+   - Smooth animations
+   - Compact mode for mobile
+   ============================================================ */
 
 export function WalletButton({ compact = false }: { compact?: boolean }) {
   const wallet = useWallet();
@@ -35,16 +53,17 @@ export function WalletButton({ compact = false }: { compact?: boolean }) {
     setOpen(false);
   };
 
-  // --- Connected state ---
+  // ── Connected state ──
   if (wallet.status === "connected" && wallet.address) {
     if (!wallet.isCorrectNetwork) {
       return (
         <button
           onClick={() => wallet.switchToArc()}
-          className="flex items-center gap-2 rounded-full border border-warn-amber/60 bg-warn-amber/10 px-4 py-2 text-sm font-medium text-warn-amber transition hover:bg-warn-amber/20"
+          className="group flex items-center gap-2 rounded-xl border border-warn-amber/50 bg-warn-amber/10 px-4 py-2.5 text-sm font-medium text-warn-amber transition-all duration-300 hover:bg-warn-amber/20 hover:border-warn-amber/70"
         >
-          <span className="h-2 w-2 rounded-full bg-warn-amber" />
-          {t("wallet.switchNetwork")}
+          <AlertTriangle className="h-4 w-4" />
+          <span className="hidden sm:inline">{t("wallet.switchNetwork")}</span>
+          <span className="sm:hidden">Switch</span>
         </button>
       );
     }
@@ -53,18 +72,31 @@ export function WalletButton({ compact = false }: { compact?: boolean }) {
       <div className="relative" ref={rootRef}>
         <button
           onClick={() => setOpen((v) => !v)}
-          className="flex items-center gap-2 rounded-full border border-ink-line bg-ink-2 px-4 py-2 font-mono text-sm text-text transition hover:border-stamp-green/60"
+          className={cn(
+            "group flex items-center gap-2 rounded-xl border bg-ink-2 px-4 py-2.5 font-mono text-sm transition-all duration-300",
+            "border-ink-line/50 text-text hover:border-stamp-green/50 hover:bg-ink-3"
+          )}
         >
-          <span className="h-2 w-2 rounded-full bg-stamp-green" />
-          {shortAddress(wallet.address)}
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-stamp-green opacity-60" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-stamp-green" />
+          </span>
+          <span>{shortAddress(wallet.address)}</span>
+          <ChevronDown
+            className={cn(
+              "h-3.5 w-3.5 text-text-muted transition-transform duration-300",
+              open && "rotate-180"
+            )}
+          />
         </button>
+
         {open && (
-          <div className="absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border border-ink-line bg-ink-2 shadow-xl shadow-black/40">
-            <div className="border-b border-ink-line px-4 py-3">
-              <p className="text-xs text-text-muted">
+          <div className="absolute right-0 z-50 mt-2 w-60 overflow-hidden rounded-2xl border border-ink-line/50 bg-ink-2 shadow-2xl shadow-black/40">
+            <div className="border-b border-ink-line/30 px-4 py-3">
+              <p className="text-[11px] uppercase tracking-wider text-text-faint">
                 {t("wallet.connectedVia")}
               </p>
-              <p className="text-sm font-medium capitalize">
+              <p className="mt-0.5 text-sm font-medium capitalize">
                 {wallet.walletId === "okx" ? "OKX Wallet" : "MetaMask"}
               </p>
             </div>
@@ -72,8 +104,9 @@ export function WalletButton({ compact = false }: { compact?: boolean }) {
               href={`${ARC_EXPLORER_URL}/address/${wallet.address}`}
               target="_blank"
               rel="noreferrer"
-              className="block px-4 py-2.5 text-sm text-text hover:bg-ink"
+              className="group flex items-center gap-2 px-4 py-3 text-sm text-text transition-colors hover:bg-ink-3"
             >
+              <ExternalLink className="h-3.5 w-3.5 text-text-muted" />
               {t("wallet.viewExplorer")}
             </a>
             <button
@@ -81,8 +114,9 @@ export function WalletButton({ compact = false }: { compact?: boolean }) {
                 wallet.disconnect();
                 setOpen(false);
               }}
-              className="block w-full px-4 py-2.5 text-left text-sm text-warn-amber hover:bg-ink"
+              className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm text-warn-amber transition-colors hover:bg-ink-3"
             >
+              <LogOut className="h-3.5 w-3.5" />
               {t("wallet.disconnect")}
             </button>
           </div>
@@ -91,26 +125,39 @@ export function WalletButton({ compact = false }: { compact?: boolean }) {
     );
   }
 
-  // --- Idle / connecting / error state ---
+  // ── Idle / connecting / error state ──
   return (
     <div className="relative" ref={rootRef}>
       <button
         onClick={() => setOpen((v) => !v)}
         disabled={wallet.status === "connecting"}
-        className={`rounded-full bg-accent px-5 py-2 text-sm font-medium text-white transition hover:bg-accent-strong disabled:opacity-60 ${
-          compact ? "w-full" : ""
-        }`}
+        className={cn(
+          "group inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-medium text-white transition-all duration-300",
+          "hover:bg-accent-strong hover:shadow-lg hover:shadow-accent/20",
+          "disabled:opacity-60 disabled:cursor-not-allowed",
+          compact && "w-full justify-center"
+        )}
       >
-        {wallet.status === "connecting"
-          ? t("wallet.connecting")
-          : t("wallet.connect")}
+        {wallet.status === "connecting" ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>{t("wallet.connecting")}</span>
+          </>
+        ) : (
+          <>
+            <Wallet className="h-4 w-4" />
+            <span>{t("wallet.connect")}</span>
+          </>
+        )}
       </button>
 
       {open && (
-        <div className="absolute right-0 z-20 mt-2 w-64 overflow-hidden rounded-xl border border-ink-line bg-ink-2 shadow-xl shadow-black/40">
-          <p className="border-b border-ink-line px-4 py-2.5 text-xs text-text-muted">
-            {t("wallet.pick")}
-          </p>
+        <div className="absolute right-0 z-50 mt-2 w-64 overflow-hidden rounded-2xl border border-ink-line/50 bg-ink-2 shadow-2xl shadow-black/40">
+          <div className="border-b border-ink-line/30 px-4 py-3">
+            <p className="text-[11px] uppercase tracking-wider text-text-faint">
+              {t("wallet.pick")}
+            </p>
+          </div>
           {WALLETS.map((w) => {
             const available = wallet.isProviderAvailable(w.id);
             if (!available && wallet.isMobile) {
@@ -118,12 +165,12 @@ export function WalletButton({ compact = false }: { compact?: boolean }) {
                 <a
                   key={w.id}
                   href={wallet.mobileDeepLink(w.id)}
-                  className="flex items-center gap-3 px-4 py-3 text-sm text-text hover:bg-ink"
+                  className="flex items-center gap-3 px-4 py-3 text-sm text-text transition-colors hover:bg-ink-3"
                 >
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-ink-line font-mono text-[10px]">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink-3 border border-ink-line/30 font-mono text-[10px]">
                     {w.monogram}
                   </span>
-                  {t("wallet.openInApp")} {w.label}
+                  <span>{t("wallet.openInApp")} {w.label}</span>
                 </a>
               );
             }
@@ -134,12 +181,12 @@ export function WalletButton({ compact = false }: { compact?: boolean }) {
                   className="flex items-center justify-between px-4 py-3 text-sm text-text-muted"
                 >
                   <span className="flex items-center gap-3">
-                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-ink-line font-mono text-[10px]">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink-3 border border-ink-line/30 font-mono text-[10px] text-text-faint">
                       {w.monogram}
                     </span>
                     {w.label}
                   </span>
-                  <span className="text-xs">{t("wallet.notDetected")}</span>
+                  <span className="text-[11px] text-text-faint">{t("wallet.notDetected")}</span>
                 </div>
               );
             }
@@ -147,9 +194,9 @@ export function WalletButton({ compact = false }: { compact?: boolean }) {
               <button
                 key={w.id}
                 onClick={() => handlePick(w.id)}
-                className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-text hover:bg-ink"
+                className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-text transition-colors hover:bg-ink-3"
               >
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-ink-line font-mono text-[10px]">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink-3 border border-ink-line/30 font-mono text-[10px]">
                   {w.monogram}
                 </span>
                 {w.label}
@@ -157,12 +204,12 @@ export function WalletButton({ compact = false }: { compact?: boolean }) {
             );
           })}
           {wallet.status === "error" && wallet.error === "not_found" && (
-            <p className="border-t border-ink-line px-4 py-2.5 text-xs text-warn-amber">
+            <p className="border-t border-ink-line/30 px-4 py-3 text-xs text-warn-amber">
               {t("wallet.notInstalled")}
             </p>
           )}
           {wallet.status === "error" && wallet.error === "rejected" && (
-            <p className="border-t border-ink-line px-4 py-2.5 text-xs text-warn-amber">
+            <p className="border-t border-ink-line/30 px-4 py-3 text-xs text-warn-amber">
               {t("wallet.rejected")}
             </p>
           )}
