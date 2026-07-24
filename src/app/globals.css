@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+/* Dark is the default brand look — ink background, warm paper accents */
+:root,
+.dark {
+  --ink: #0e1412;
+  --ink-2: #161f1b;
+  --ink-line: #2a332e;
+
+  --paper-white: #efeadb;
+  --paper-pink: #f0d3d6;
+  --paper-yellow: #eddca0;
+  --paper-ink: #26231c;
+
+  --accent: #4e7fe0;
+  --accent-strong: #3a63c4;
+  --stamp-green: #4c9a6a;
+  --warn-amber: #d98c3b;
+
+  --text: #ede7da;
+  --text-muted: #98a19a;
+}
+
+/* Light mode: same "ledger paper" family, just flipped — not a generic
+   template light theme, it's the same paper the dark mode is printed on */
+.light {
+  --ink: #eef0e6;
+  --ink-2: #e3e6d9;
+  --ink-line: #c9cfbd;
+
+  --paper-white: #fbf9f2;
+  --paper-pink: #f6dde0;
+  --paper-yellow: #f3e3ac;
+  --paper-ink: #26231c;
+
+  --accent: #3f6fd1;
+  --accent-strong: #2f57ab;
+  --stamp-green: #3f8259;
+  --warn-amber: #a8641f;
+
+  --text: #1c2119;
+  --text-muted: #5b6355;
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-line: var(--ink-line);
+  --color-paper-white: var(--paper-white);
+  --color-paper-pink: var(--paper-pink);
+  --color-paper-yellow: var(--paper-yellow);
+  --color-paper-ink: var(--paper-ink);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-stamp-green: var(--stamp-green);
+  --color-warn-amber: var(--warn-amber);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+
+  --font-display: "Space Grotesk", sans-serif;
+  --font-sans: "IBM Plex Sans", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+}
+
+* {
+  scrollbar-color: var(--ink-line) var(--ink);
+}
+
+html {
+  color-scheme: dark;
+}
+html.light {
+  color-scheme: light;
+}
+
+body {
+  background: var(--ink);
+  color: var(--text);
+  font-family: var(--font-sans);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
