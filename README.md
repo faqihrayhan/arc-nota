@@ -1,102 +1,92 @@
-# Nota
+# Nota — Catatan Pembayaran & Analisa Keuangan di Arc
 
-**Payment tracking and financial insight, on-chain on Arc.**
+<p align="center">
+  <img src="https://img.shields.io/badge/Built%20on-Arc%20Testnet-4E7FE0?style=flat-square" alt="Built on Arc Testnet" />
+  <img src="https://img.shields.io/badge/Next.js-16.2.10-000000?style=flat-square&logo=next.js" alt="Next.js 16" />
+  <img src="https://img.shields.io/badge/TypeScript-5.0-3178C6?style=flat-square&logo=typescript" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Tailwind%20CSS-v4-06B6D4?style=flat-square&logo=tailwindcss" alt="Tailwind CSS" />
+</p>
 
-Pay with a QR code, get it logged as a digital receipt automatically,
-analyzed, and projected forward. Built on [Arc](https://arc.io) —
-a stablecoin payments network.
-
-🔗 **Live demo:** [arc-notes-delta.vercel.app](https://arc-notes-delta.vercel.app)
+<p align="center">
+  <strong>Tiap transaksi jadi nota. Tiap nota jadi wawasan.</strong>
+</p>
 
 ---
 
-## What is this
+## Tentang
 
-Most crypto payment apps stop at "transaction sent." Nota goes one step
-further — every payment becomes a note (a "nota," Indonesian for
-receipt), which then feeds into spending analysis and a forecast for
-next month. Think of it like a triplicate receipt book, except one copy
-lives on-chain.
+**Nota** adalah aplikasi web pencatatan & analisa pengeluaran pribadi yang berjalan di atas **Arc Testnet**. Pengguna membayar transaksi sehari-hari lewat QR code, dan setiap transaksi otomatis tercatat sebagai "nota" digital on-chain. Dari kumpulan nota itu, aplikasi menyediakan analisa pengeluaran dan proyeksi (forecast) untuk bulan berikutnya.
 
-Still early — this started as a way to actually learn how a wallet-
-connected dApp gets built end to end, not just ship a demo.
+**Analogi produk:** nota rangkap tiga ala toko Indonesia (putih/pink/kuning) — satu transaksi, tiga kegunaan: bukti bayar, bahan analisa, bahan proyeksi.
 
-## Features
+---
 
-| Feature | What it does | Status |
-|---|---|---|
-| **Payment** | Show a payment QR, get scanned, logged on-chain automatically | Success |
-| **Insights** | Auto-categorized breakdown of where your money went | Success |
-| **Forecast** | Projected spending for next month based on history | Success |
+## Fitur
 
-Landing page, wallet connection, dark/light mode, and ID/EN language
-support are already live.
+| Fitur | Deskripsi | Status |
+|-------|-----------|--------|
+| **Payment** | Generate QR untuk menerima pembayaran, atau scan QR untuk membayar. Model pull/allowance — pembayar approve, kasir transferFrom. | ✅ Live |
+| **Analisa Keuangan** | Semua nota dikelompokkan otomatis per kategori dengan breakdown visual. | ✅ Live |
+| **Forecast** | Proyeksi pengeluaran bulan depan berdasarkan pola historis. | ✅ Live |
+| **Multi-wallet** | Dukungan MetaMask & OKX Wallet dengan auto-switch ke Arc Testnet. | ✅ Live |
+| **i18n** | Bahasa Indonesia & English. | ✅ Live |
+| **Dark/Light Mode** | Tema gelap & terang dengan design system "ledger paper". | ✅ Live |
+
+---
 
 ## Tech Stack
 
-- **Framework:** Next.js (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS
-- **Wallet:** Direct EIP-1193 integration (MetaMask & OKX Wallet — no
-  wagmi/viem, kept intentionally lightweight)
-- **Theming:** next-themes
-- **Deployment:** Vercel
-
-## Arc Testnet
-
-| | |
-|---|---|
-| Chain ID | `5042002` |
-| RPC URL | `https://rpc.testnet.arc.network` |
-| Explorer | [testnet.arcscan.app](https://testnet.arcscan.app) |
-| Faucet | [faucet.circle.com](https://faucet.circle.com) |
-| Gas token | USDC |
-
-## Running Locally
-
-You'll need Node.js ≥ 20, and a browser wallet (MetaMask or OKX Wallet)
-configured for Arc Testnet.
-
-```bash
-git clone https://github.com/faqihrayhan/arc-nota.git
-cd arc-nota
-npm install
-npm run dev
-```
-
-Then open [http://localhost:3000](http://localhost:3000).
-
-## Project Structure
-
-```
-src/
-├── app/          # Routing & layout (Next.js App Router)
-├── components/   # UI components
-├── context/      # React Context (wallet, language)
-├── lib/          # Config & helpers (chain config, etc.)
-└── i18n/         # ID/EN translation strings
-```
-
-## Roadmap
-
-- [x] Landing page & wallet connect
-- [x] Dark/light mode
-- [x] ID/EN language support
-- [x] Payment (on-chain QR payments)
-- [x] Insights (spending analysis)
-- [x] Forecast
-
-## Heads up
-
-This runs on **Arc Testnet** — tokens and transactions here have **no
-real value**. Purely for building and testing.
-
-## Built on Arc
-
-This project is built on [Arc](https://arc.io) infrastructure. See the
-[Arc Brand Guidelines](https://www.arc.io/brand-guidelines-and-partner-toolkit)
-for logo/name usage.
+- **Next.js 16** (App Router, Turbopack) + **TypeScript**
+- **Tailwind CSS v4** — semua warna lewat CSS variable
+- **next-themes** — dark/light mode
+- **Wallet** — EIP-1193 custom (MetaMask & OKX), bukan wagmi/viem
+- **i18n** — custom dictionary (ID/EN), bukan next-intl
+- **Database** — Supabase (dengan localStorage fallback)
 
 ---
 
-<sub>Built by [@faqihrayhan](https://github.com/faqihrayhan)</sub>
+## Info Jaringan Arc Testnet
+
+| Parameter | Nilai |
+|-----------|-------|
+| RPC URL | `https://rpc.testnet.arc.network` |
+| Chain ID | `5042002` (hex: `0x4cef52`) |
+| Explorer | [testnet.arcscan.app](https://testnet.arcscan.app) |
+| Faucet | [faucet.circle.com](https://faucet.circle.com) |
+| Gas Token | USDC (native: 18 decimal, ERC-20: 6 decimal) |
+
+---
+
+## Cara Menjalankan
+
+```bash
+# Clone & install
+git clone https://github.com/faqihrayhan/arc-nota.git
+cd arc-nota
+npm install
+
+# Jalankan dev server
+npm run dev
+# Buka http://localhost:3000
+```
+
+---
+
+## Struktur Folder
+
+```
+src/
+├── app/              # Routing App Router
+├── components/       # React components
+├── context/          # WalletContext, LanguageContext
+├── lib/              # Config chain, utilities
+└── i18n/             # Dictionaries (ID/EN)
+```
+
+---
+
+## License
+
+MIT License. See [LICENSE](./LICENSE) for details.
+
+Built with [Next.js](https://nextjs.org), [TypeScript](https://www.typescriptlang.org), [Tailwind CSS](https://tailwindcss.com), and [Arc Testnet](https://www.arc.io).
