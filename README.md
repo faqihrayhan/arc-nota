@@ -1,36 +1,102 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Nota
 
-## Getting Started
+**Payment tracking and financial insight, on-chain on Arc.**
 
-First, run the development server:
+Pay with a QR code, get it logged as a digital receipt automatically,
+analyzed, and projected forward. Built on [Arc](https://arc.io) —
+a stablecoin payments network.
+
+🔗 **Live demo:** [arc-notes-delta.vercel.app](https://arc-notes-delta.vercel.app)
+
+---
+
+## What is this
+
+Most crypto payment apps stop at "transaction sent." Nota goes one step
+further — every payment becomes a note (a "nota," Indonesian for
+receipt), which then feeds into spending analysis and a forecast for
+next month. Think of it like a triplicate receipt book, except one copy
+lives on-chain.
+
+Still early — this started as a way to actually learn how a wallet-
+connected dApp gets built end to end, not just ship a demo.
+
+## Features
+
+| Feature | What it does | Status |
+|---|---|---|
+| **Payment** | Show a payment QR, get scanned, logged on-chain automatically | Success |
+| **Insights** | Auto-categorized breakdown of where your money went | Success |
+| **Forecast** | Projected spending for next month based on history | Success |
+
+Landing page, wallet connection, dark/light mode, and ID/EN language
+support are already live.
+
+## Tech Stack
+
+- **Framework:** Next.js (App Router)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS
+- **Wallet:** Direct EIP-1193 integration (MetaMask & OKX Wallet — no
+  wagmi/viem, kept intentionally lightweight)
+- **Theming:** next-themes
+- **Deployment:** Vercel
+
+## Arc Testnet
+
+| | |
+|---|---|
+| Chain ID | `5042002` |
+| RPC URL | `https://rpc.testnet.arc.network` |
+| Explorer | [testnet.arcscan.app](https://testnet.arcscan.app) |
+| Faucet | [faucet.circle.com](https://faucet.circle.com) |
+| Gas token | USDC |
+
+## Running Locally
+
+You'll need Node.js ≥ 20, and a browser wallet (MetaMask or OKX Wallet)
+configured for Arc Testnet.
 
 ```bash
+git clone https://github.com/faqihrayhan/arc-nota.git
+cd arc-nota
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/          # Routing & layout (Next.js App Router)
+├── components/   # UI components
+├── context/      # React Context (wallet, language)
+├── lib/          # Config & helpers (chain config, etc.)
+└── i18n/         # ID/EN translation strings
+```
 
-## Learn More
+## Roadmap
 
-To learn more about Next.js, take a look at the following resources:
+- [x] Landing page & wallet connect
+- [x] Dark/light mode
+- [x] ID/EN language support
+- [x] Payment (on-chain QR payments)
+- [x] Insights (spending analysis)
+- [x] Forecast
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Heads up
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+This runs on **Arc Testnet** — tokens and transactions here have **no
+real value**. Purely for building and testing.
 
-## Deploy on Vercel
+## Built on Arc
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+This project is built on [Arc](https://arc.io) infrastructure. See the
+[Arc Brand Guidelines](https://www.arc.io/brand-guidelines-and-partner-toolkit)
+for logo/name usage.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+<sub>Built by [@faqihrayhan](https://github.com/faqihrayhan)</sub>
