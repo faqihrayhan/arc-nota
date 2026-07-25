@@ -15,9 +15,9 @@ export function Footer() {
     {
       title: t("footer.product"),
       links: [
-        { label: t("footer.payment"), href: "#payment" },
-        { label: t("footer.finance"), href: "#analisa" },
-        { label: t("footer.forecast"), href: "#forecast" },
+        { label: t("footer.payment"), href: "/payment" },
+        { label: t("footer.analisa"), href: "/analisa" },
+        { label: t("footer.forecast"), href: "/forecast" },
       ],
     },
     {
