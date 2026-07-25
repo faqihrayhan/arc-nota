@@ -42,3 +42,8 @@ next-env.d.ts
 
 # Mengabaikan semua file duplikat/cadangan
 *.backup
+
+# Backup files
+**/*.backup
+src/components/backup/
+src/app/backup/

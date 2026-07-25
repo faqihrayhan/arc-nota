@@ -1,6 +1,7 @@
 import { Nav } from "@/components/Nav";
 import { Hero } from "@/components/Hero";
 import { FeatureSection } from "@/components/FeatureSection";
+import { FAQ } from "@/components/FAQ";
 import { Footer } from "@/components/Footer";
 
 export default function Home() {
@@ -10,6 +11,7 @@ export default function Home() {
       <main className="flex-1">
         <Hero />
         <FeatureSection />
+        <FAQ />
       </main>
       <Footer />
     </>

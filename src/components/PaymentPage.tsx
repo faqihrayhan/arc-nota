@@ -6,6 +6,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { USDC_ADDRESS } from "@/lib/usdc-abi";
 import { saveTransaction, type Transaction } from "@/lib/supabase";
 import { ARC_EXPLORER_URL } from "@/lib/arc-chain";
+import { QRScanner } from "@/components/QRScanner";
 import { cn } from "@/lib/utils";
 import {
   QrCode,
@@ -105,6 +106,7 @@ export default function PaymentPage() {
   const [successTx, setSuccessTx] = useState<Transaction | null>(null);
 
   const [error, setError] = useState("");
+  const [cameraOpen, setCameraOpen] = useState(false);
 
   const total = items.reduce((sum, item) => {
     const price = parseFloat(item.price) || 0;
@@ -491,12 +493,30 @@ export default function PaymentPage() {
             <div className="rounded-2xl border border-ink-line/40 bg-ink p-6">
               <h3 className="font-display text-sm font-semibold">{t("payment.scanQR")}</h3>
               <p className="mt-1 text-xs text-text-muted">{t("payment.scanDesc")}</p>
+
+              <button
+                onClick={() => setCameraOpen(true)}
+                className={cn(
+                  "mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-ink-line/50 bg-ink-2 px-6 py-3 text-sm font-medium text-text transition-all duration-300",
+                  "hover:border-accent/50 hover:bg-ink-3 hover:text-accent"
+                )}
+              >
+                <Camera className="h-4 w-4" />
+                {t("payment.openCamera")}
+              </button>
+
+              <div className="my-4 flex items-center gap-3">
+                <div className="h-px flex-1 bg-ink-line/30" />
+                <span className="text-[11px] font-mono uppercase tracking-wider text-text-faint">{t("payment.or")}</span>
+                <div className="h-px flex-1 bg-ink-line/30" />
+              </div>
+
               <textarea
                 value={scanInput}
                 onChange={(e) => setScanInput(e.target.value)}
                 placeholder={t("payment.scanPlaceholder")}
                 rows={4}
-                className="mt-4 w-full rounded-lg border border-ink-line/50 bg-ink-2 px-4 py-3 text-sm text-text placeholder:text-text-faint outline-none focus:border-accent transition-colors resize-none font-mono"
+                className="w-full rounded-lg border border-ink-line/50 bg-ink-2 px-4 py-3 text-sm text-text placeholder:text-text-faint outline-none focus:border-accent transition-colors resize-none font-mono"
               />
               <button
                 onClick={handleScan}
@@ -617,6 +637,30 @@ export default function PaymentPage() {
             </div>
           ) : null}
         </div>
+      )}
+      {cameraOpen && (
+        <QRScanner
+          onScan={(data) => {
+            setScanInput(data);
+            setCameraOpen(false);
+            setTimeout(() => {
+              try {
+                const decoded = decodeQR(data.trim());
+                if (decoded && Date.now() <= decoded.expiresAt) {
+                  setScannedData(decoded);
+                  setError("");
+                } else if (decoded) {
+                  setError(t("payment.error.qrExpired"));
+                } else {
+                  setError(t("payment.error.invalidQR"));
+                }
+              } catch {
+                setError(t("payment.error.invalidQR"));
+              }
+            }, 100);
+          }}
+          onClose={() => setCameraOpen(false)}
+        />
       )}
     </section>
   );
