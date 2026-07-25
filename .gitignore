@@ -47,3 +47,5 @@ next-env.d.ts
 **/*.backup
 src/components/backup/
 src/app/backup/
+CLAUDE.md
+PRD.md
