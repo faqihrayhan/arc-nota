@@ -64,7 +64,7 @@ export function FeatureSection() {
   ];
 
   return (
-    <section ref={sectionRef} className="relative border-t border-ink-line/40 bg-ink-2/20">
+    <section ref={sectionRef} id="how-it-works" className="relative border-t border-ink-line/40 bg-ink-2/20 scroll-mt-28">
       <div className="absolute inset-0 opacity-[0.02]" style={{
         backgroundImage: `linear-gradient(var(--ink-line) 1px, transparent 1px), linear-gradient(90deg, var(--ink-line) 1px, transparent 1px)`,
         backgroundSize: "60px 60px",

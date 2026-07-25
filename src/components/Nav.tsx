@@ -9,14 +9,16 @@ import { useLanguage } from "@/context/LanguageContext";
 import { cn } from "@/lib/utils";
 import {
   BookOpen, FileText, Code, HelpCircle, ExternalLink, ChevronDown,
-  CreditCard, BarChart3, TrendingUp,
+  CreditCard, BarChart3, TrendingUp, Layers,
 } from "lucide-react";
 
 export function Nav() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [docsOpen, setDocsOpen] = useState(false);
+  const [featuresOpen, setFeaturesOpen] = useState(false);
   const docsRef = useRef<HTMLDivElement>(null);
+  const featuresRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const { t } = useLanguage();
 
@@ -24,6 +26,9 @@ export function Nav() {
     function handleClickOutside(e: MouseEvent) {
       if (docsRef.current && !docsRef.current.contains(e.target as Node)) {
         setDocsOpen(false);
+      }
+      if (featuresRef.current && !featuresRef.current.contains(e.target as Node)) {
+        setFeaturesOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -39,10 +44,10 @@ export function Nav() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const links = [
-    { href: "/payment", label: t("nav.payment"), id: "payment", icon: CreditCard },
-    { href: "/analisa", label: t("nav.analisa"), id: "analisa", icon: BarChart3 },
-    { href: "/forecast", label: t("nav.forecast"), id: "forecast", icon: TrendingUp },
+  const featureItems = [
+    { icon: CreditCard, title: t("nav.payment"), desc: t("features.payment.desc"), href: "/payment" },
+    { icon: BarChart3, title: t("nav.analisa"), desc: t("features.analisa.desc"), href: "/analisa" },
+    { icon: TrendingUp, title: t("nav.forecast"), desc: t("features.forecast.desc"), href: "/forecast" },
   ];
 
   const docsItems = [
@@ -61,18 +66,56 @@ export function Nav() {
         </a>
 
         <nav className="hidden items-center gap-0.5 md:flex">
-          {links.map((l) => {
-            const isActive = pathname === l.href;
-            return (
-              <a key={l.href} href={l.href} className={cn("relative px-4 py-2 text-sm rounded-xl transition-all duration-300 group flex items-center gap-2", isActive ? "text-text bg-white/[0.06]" : "text-text-muted hover:text-text hover:bg-white/[0.03]")}>
-                <l.icon className="h-4 w-4" />
-                <span className="relative z-10">{l.label}</span>
-                <span className={cn("absolute bottom-1 left-1/2 -translate-x-1/2 h-[3px] rounded-full bg-paper-white transition-all duration-300", isActive ? "w-5 opacity-100" : "w-0 opacity-0")} />
-                <span className="absolute inset-0 rounded-xl bg-white/0 group-hover:bg-white/[0.02] transition-all duration-300" />
-              </a>
-            );
-          })}
+          {/* How it works — scroll ke section */}
+          <a
+            href="/#how-it-works"
+             className="relative px-4 py-2 text-sm rounded-xl transition-all duration-300 group flex items-center gap-2 text-text-muted hover:text-text hover:bg-white/[0.03]"
+>
+            <Layers className="h-4 w-4" />
+            <span className="relative z-10">{t("nav.howItWorks")}</span>
+          </a>
 
+          {/* Features Dropdown */}
+          <div className="relative" ref={featuresRef}>
+            <button
+              onClick={() => setFeaturesOpen((v) => !v)}
+              className={cn(
+                "flex items-center gap-1.5 px-4 py-2 text-sm rounded-xl transition-all duration-300",
+                featuresOpen ? "text-text bg-white/[0.06]" : "text-text-muted hover:text-text hover:bg-white/[0.03]"
+              )}
+            >
+              <span>{t("nav.features")}</span>
+              <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-300", featuresOpen && "rotate-180")} />
+            </button>
+            <div
+              className={cn(
+                "absolute top-full left-1/2 -translate-x-1/2 mt-3 w-72 overflow-hidden rounded-2xl border border-ink-line/60 bg-ink-2/95 backdrop-blur-2xl shadow-2xl shadow-black/40 transition-all duration-300 origin-top",
+                featuresOpen ? "opacity-100 scale-100 translate-y-0 pointer-events-auto" : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
+              )}
+            >
+              <div className="p-2">
+                {featureItems.map((item) => (
+                  <a
+                    key={item.title}
+                    href={item.href}
+                    onClick={() => setFeaturesOpen(false)}
+                    className="group flex items-start gap-3 rounded-xl px-3 py-3 transition-all duration-200 hover:bg-white/[0.04]"
+                  >
+                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-ink-3 border border-ink-line/40 text-text-muted transition-all duration-200 group-hover:text-text group-hover:border-ink-line/60">
+                      <item.icon className="h-4 w-4" />
+                    </div>
+                    <div className="flex-1">
+                      <span className="text-sm font-medium text-text">{item.title}</span>
+                      <p className="mt-0.5 text-xs text-text-muted line-clamp-1">{item.desc}</p>
+                    </div>
+                    <ExternalLink className="mt-1 h-3.5 w-3.5 shrink-0 text-text-faint opacity-0 transition-all duration-200 group-hover:opacity-100 group-hover:text-text-muted" />
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Docs Dropdown */}
           <div className="relative" ref={docsRef}>
             <button onClick={() => setDocsOpen((v) => !v)} className={cn("flex items-center gap-1.5 px-4 py-2 text-sm rounded-xl transition-all duration-300", docsOpen ? "text-text bg-white/[0.06]" : "text-text-muted hover:text-text hover:bg-white/[0.03]")}>
               <span>Docs</span>
@@ -124,17 +167,24 @@ export function Nav() {
         </button>
       </div>
 
-      <div className={cn("md:hidden overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]", menuOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0")}>
+      {/* Mobile menu */}
+      <div className={cn("md:hidden overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]", menuOpen ? "max-h-[700px] opacity-100" : "max-h-0 opacity-0")}>
         <div className="border-t border-ink-line/40 px-5 py-5 space-y-1">
-          {links.map((l) => {
-            const isActive = pathname === l.href;
-            return (
-              <a key={l.href} href={l.href} onClick={() => setMenuOpen(false)} className={cn("flex items-center gap-3 px-4 py-3 text-sm rounded-xl transition-all duration-300", isActive ? "text-text bg-white/[0.06]" : "text-text-muted hover:text-text hover:bg-white/[0.03]")}>
-                <l.icon className="h-4 w-4 text-text-faint" />
-                <span className="font-medium">{l.label}</span>
+          <a href="/#how-it-works" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm rounded-xl text-text-muted hover:text-text hover:bg-white/[0.03] transition-all duration-300">
+            <Layers className="h-4 w-4 text-text-faint" />
+            <span className="font-medium">{t("nav.howItWorks")}</span>
+          </a>
+
+          <div className="pt-2">
+            <p className="px-4 py-2 text-[11px] font-mono uppercase tracking-wider text-text-faint">{t("nav.features")}</p>
+            {featureItems.map((item) => (
+              <a key={item.title} href={item.href} onClick={() => setMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-muted hover:text-text hover:bg-white/[0.03] rounded-xl transition-all duration-200">
+                <item.icon className="h-4 w-4 text-text-faint" />
+                <span>{item.title}</span>
               </a>
-            );
-          })}
+            ))}
+          </div>
+
           <div className="pt-2">
             <p className="px-4 py-2 text-[11px] font-mono uppercase tracking-wider text-text-faint">Documentation</p>
             {docsItems.map((item) => (

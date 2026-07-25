@@ -11,6 +11,8 @@ export const dictionaries: Record<Locale, Record<string, string>> = {
     "nav.payment": "Payment",
     "nav.analisa": "Analisa",
     "nav.forecast": "Forecast",
+    "nav.howItWorks": "Cara kerja",
+    "nav.features": "Fitur",
 
     "hero.badge": "Built on Arc · Testnet",
     "hero.title1": "Tiap transaksi jadi nota.",
@@ -173,6 +175,8 @@ export const dictionaries: Record<Locale, Record<string, string>> = {
     "nav.payment": "Payment",
     "nav.analisa": "Insights",
     "nav.forecast": "Forecast",
+    "nav.howItWorks": "How it works",
+    "nav.features": "Features",
 
     "hero.badge": "Built on Arc · Testnet",
     "hero.title1": "Every purchase becomes a note.",
