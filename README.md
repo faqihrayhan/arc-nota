@@ -1,4 +1,4 @@
-# Nota — Catatan Pembayaran & Analisa Keuangan di Arc
+# Nota Payment tracking and financial insight, on-chain on Arc.
 
 <p align="center">
   <img src="https://img.shields.io/badge/Built%20on-Arc%20Testnet-4E7FE0?style=flat-square" alt="Built on Arc Testnet" />
@@ -13,24 +13,34 @@
 
 ---
 
-## Tentang
+## About
 
-**Nota** adalah aplikasi web pencatatan & analisa pengeluaran pribadi yang berjalan di atas **Arc Testnet**. Pengguna membayar transaksi sehari-hari lewat QR code, dan setiap transaksi otomatis tercatat sebagai "nota" digital on-chain. Dari kumpulan nota itu, aplikasi menyediakan analisa pengeluaran dan proyeksi (forecast) untuk bulan berikutnya.
+Nota
 
-**Analogi produk:** nota rangkap tiga ala toko Indonesia (putih/pink/kuning) — satu transaksi, tiga kegunaan: bukti bayar, bahan analisa, bahan proyeksi.
+**Payment tracking and financial insight, on-chain on Arc.**
+
+Pay with a QR code, get it logged as a digital receipt automatically,
+analyzed, and projected forward. Built on [Arc](https://arc.io) —
+a stablecoin payments network.
+
+**Product Analogy:** Most crypto payment apps stop at "transaction sent." Nota goes one step
+further — every payment becomes a note (a "nota," Indonesian for
+receipt), which then feeds into spending analysis and a forecast for
+next month. Think of it like a triplicate receipt book, except one copy
+lives on-chain.
 
 ---
 
-## Fitur
+## Features
 
-| Fitur | Deskripsi | Status |
-|-------|-----------|--------|
-| **Payment** | Generate QR untuk menerima pembayaran, atau scan QR untuk membayar. Model pull/allowance — pembayar approve, kasir transferFrom. | ✅ Live |
-| **Analisa Keuangan** | Semua nota dikelompokkan otomatis per kategori dengan breakdown visual. | ✅ Live |
-| **Forecast** | Proyeksi pengeluaran bulan depan berdasarkan pola historis. | ✅ Live |
-| **Multi-wallet** | Dukungan MetaMask & OKX Wallet dengan auto-switch ke Arc Testnet. | ✅ Live |
-| **i18n** | Bahasa Indonesia & English. | ✅ Live |
-| **Dark/Light Mode** | Tema gelap & terang dengan design system "ledger paper". | ✅ Live |
+| Feature | What it does | Status |
+|---|---|---|
+| **Payment** | Show a payment QR, get scanned, logged on-chain automatically | Success |
+| **Insights** | Auto-categorized breakdown of where your money went | Success |
+| **Forecast** | Projected spending for next month based on history | Success |
+
+Landing page, wallet connection, dark/light mode, and ID/EN language
+support are already live.
 
 ---
 
@@ -40,12 +50,12 @@
 - **Tailwind CSS v4** — semua warna lewat CSS variable
 - **next-themes** — dark/light mode
 - **Wallet** — EIP-1193 custom (MetaMask & OKX), bukan wagmi/viem
-- **i18n** — custom dictionary (ID/EN), bukan next-intl
+- **i18n** — custom dictionary (ID/EN)
 - **Database** — Supabase (dengan localStorage fallback)
 
 ---
 
-## Info Jaringan Arc Testnet
+## Arc Testnet
 
 | Parameter | Nilai |
 |-----------|-------|
@@ -57,7 +67,7 @@
 
 ---
 
-## Cara Menjalankan
+## Running Locally
 
 ```bash
 # Clone & install
@@ -72,18 +82,29 @@ npm run dev
 
 ---
 
-## Struktur Folder
+## Project Structure
 
 ```
 src/
-├── app/              # Routing App Router
-├── components/       # React components
-├── context/          # WalletContext, LanguageContext
-├── lib/              # Config chain, utilities
-└── i18n/             # Dictionaries (ID/EN)
+├── app/          # Routing & layout (Next.js App Router)
+├── components/   # UI components
+├── context/      # React Context (wallet, language)
+├── lib/          # Config & helpers (chain config, etc.)
+└── i18n/         # ID/EN translation strings
 ```
 
 ---
+
+## Heads up
+
+This runs on **Arc Testnet** — tokens and transactions here have **no
+real value**. Purely for building and testing.
+
+## Built on Arc
+
+This project is built on [Arc](https://arc.io) infrastructure. See the
+[Arc Brand Guidelines](https://www.arc.io/brand-guidelines-and-partner-toolkit)
+for logo/name usage.
 
 ## License
 
