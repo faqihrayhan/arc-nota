@@ -1,4 +1,4 @@
-# Nota Payment tracking and financial insight, on-chain on Arc.
+# Arc Nota
 
 <p align="center">
   <img src="https://img.shields.io/badge/Built%20on-Arc%20Testnet-4E7FE0?style=flat-square" alt="Built on Arc Testnet" />
@@ -7,24 +7,18 @@
   <img src="https://img.shields.io/badge/Tailwind%20CSS-v4-06B6D4?style=flat-square&logo=tailwindcss" alt="Tailwind CSS" />
 </p>
 
-<p align="center">
-  <strong>Tiap transaksi jadi nota. Tiap nota jadi wawasan.</strong>
-</p>
-
----
 
 ## About
 
-Nota
+ArcNota
 
 **Payment tracking and financial insight, on-chain on Arc.**
 
 Pay with a QR code, get it logged as a digital receipt automatically,
-analyzed, and projected forward. Built on [Arc](https://arc.io) —
-a stablecoin payments network.
+analyzed, and projected forward. Built on [Arc](https://arc.io) a stablecoin payments network.
 
 **Product Analogy:** Most crypto payment apps stop at "transaction sent." Nota goes one step
-further — every payment becomes a note (a "nota," Indonesian for
+further every payment becomes a note (a "nota," Indonesian for
 receipt), which then feeds into spending analysis and a forecast for
 next month. Think of it like a triplicate receipt book, except one copy
 lives on-chain.
@@ -97,7 +91,7 @@ src/
 
 ## Heads up
 
-This runs on **Arc Testnet** — tokens and transactions here have **no
+This runs on **Arc Testnet** tokens and transactions here have **no
 real value**. Purely for building and testing.
 
 ## Built on Arc
