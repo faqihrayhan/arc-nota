@@ -16,6 +16,7 @@ export function QRScanner({ onScan, onClose }: QRScannerProps) {
   const [error, setError] = useState("");
   const [scanning, setScanning] = useState(false);
   const scannerInstanceRef = useRef<any>(null);
+  const isRunningRef = useRef(false);
 
   useEffect(() => {
     let mounted = true;
@@ -33,17 +34,22 @@ export function QRScanner({ onScan, onClose }: QRScannerProps) {
           { fps: 10, qrbox: { width: 250, height: 250 } },
           (decodedText: string) => {
             onScan(decodedText);
+            isRunningRef.current = false;
             scanner.stop().catch(() => {});
           },
-          () => {
-            // ignore scan errors (no QR in frame yet)
-          }
+          () => {}
         );
 
-        setScanning(true);
+        if (mounted) {
+          setScanning(true);
+          isRunningRef.current = true;
+        }
       } catch (err) {
-        setError(t("payment.cameraError"));
-        setScanning(false);
+        if (mounted) {
+          setError(t("payment.cameraError"));
+          setScanning(false);
+          isRunningRef.current = false;
+        }
       }
     }
 
@@ -51,11 +57,28 @@ export function QRScanner({ onScan, onClose }: QRScannerProps) {
 
     return () => {
       mounted = false;
-      if (scannerInstanceRef.current) {
+      if (isRunningRef.current && scannerInstanceRef.current) {
         scannerInstanceRef.current.stop().catch(() => {});
+        isRunningRef.current = false;
       }
     };
   }, [onScan, t]);
+
+  const handleClose = () => {
+    // Only try to stop if scanner is actually running
+    if (isRunningRef.current && scannerInstanceRef.current) {
+      scannerInstanceRef.current
+        .stop()
+        .catch(() => {})
+        .finally(() => {
+          isRunningRef.current = false;
+          onClose();
+        });
+    } else {
+      // Scanner never started or already errored — just close
+      onClose();
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm">
@@ -67,12 +90,7 @@ export function QRScanner({ onScan, onClose }: QRScannerProps) {
             <span className="font-display text-sm font-semibold">{t("payment.scanWithCamera")}</span>
           </div>
           <button
-            onClick={() => {
-              if (scannerInstanceRef.current) {
-                scannerInstanceRef.current.stop().catch(() => {});
-              }
-              onClose();
-            }}
+            onClick={handleClose}
             className="flex h-8 w-8 items-center justify-center rounded-lg border border-ink-line/40 text-text-muted transition-all hover:text-text hover:bg-white/[0.03]"
           >
             <X className="h-4 w-4" />
