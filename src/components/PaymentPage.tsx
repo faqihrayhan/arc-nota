@@ -1,0 +1,636 @@
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import { useWallet } from "@/context/WalletContext";
+import { useLanguage } from "@/context/LanguageContext";
+import { USDC_ADDRESS } from "@/lib/usdc-abi";
+import { saveTransaction, type Transaction } from "@/lib/supabase";
+import { ARC_EXPLORER_URL } from "@/lib/arc-chain";
+import { cn } from "@/lib/utils";
+import {
+  QrCode,
+  Camera,
+  Receipt,
+  Plus,
+  Trash2,
+  CheckCircle2,
+  Clock,
+  AlertTriangle,
+  Loader2,
+  Copy,
+  ExternalLink,
+  Wallet,
+} from "lucide-react";
+
+const CATEGORIES = [
+  { id: "makan", icon: "🍽️" },
+  { id: "transport", icon: "🚗" },
+  { id: "belanja", icon: "🛒" },
+  { id: "hiburan", icon: "🎬" },
+  { id: "kesehatan", icon: "💊" },
+  { id: "lainnya", icon: "📦" },
+];
+
+type QRData = {
+  payerAddress: string;
+  totalAmount: string;
+  items: { name: string; price: number }[];
+  category: string;
+  timestamp: number;
+  expiresAt: number;
+  nonce: string;
+};
+
+type Tab = "bayar" | "terima";
+
+function generateNonce() {
+  return Math.random().toString(36).substring(2, 15);
+}
+
+function formatUSDC(amount: string | number): string {
+  const num = typeof amount === "string" ? parseFloat(amount) : amount;
+  return num.toLocaleString("id-ID", { minimumFractionDigits: 2, maximumFractionDigits: 6 });
+}
+
+function encodeQR(data: QRData): string {
+  try {
+    return btoa(JSON.stringify(data));
+  } catch {
+    return "";
+  }
+}
+
+function decodeQR(raw: string): QRData | null {
+  try {
+    return JSON.parse(atob(raw));
+  } catch {
+    return null;
+  }
+}
+
+function encodeApprove(spender: string, amount: string): string {
+  const fnSig = "0x095ea7b3";
+  const paddedSpender = spender.toLowerCase().replace("0x", "").padStart(64, "0");
+  const paddedAmount = BigInt(amount).toString(16).padStart(64, "0");
+  return fnSig + paddedSpender + paddedAmount;
+}
+
+function encodeTransferFrom(from: string, to: string, amount: string): string {
+  const fnSig = "0x23b872dd";
+  const paddedFrom = from.toLowerCase().replace("0x", "").padStart(64, "0");
+  const paddedTo = to.toLowerCase().replace("0x", "").padStart(64, "0");
+  const paddedAmount = BigInt(amount).toString(16).padStart(64, "0");
+  return fnSig + paddedFrom + paddedTo + paddedAmount;
+}
+
+export default function PaymentPage() {
+  const wallet = useWallet();
+  const { t } = useLanguage();
+  const [tab, setTab] = useState<Tab>("bayar");
+
+  const [items, setItems] = useState<{ name: string; price: string }[]>([
+    { name: "", price: "" },
+  ]);
+  const [category, setCategory] = useState("makan");
+  const [qrData, setQrData] = useState<QRData | null>(null);
+  const [qrRaw, setQrRaw] = useState("");
+  const [approving, setApproving] = useState(false);
+  const [approveTx, setApproveTx] = useState("");
+  const [timeLeft, setTimeLeft] = useState(0);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [scanInput, setScanInput] = useState("");
+  const [scannedData, setScannedData] = useState<QRData | null>(null);
+  const [transferring, setTransferring] = useState(false);
+  const [successTx, setSuccessTx] = useState<Transaction | null>(null);
+
+  const [error, setError] = useState("");
+
+  const total = items.reduce((sum, item) => {
+    const price = parseFloat(item.price) || 0;
+    return sum + price;
+  }, 0);
+
+  useEffect(() => {
+    if (!qrData) {
+      if (timerRef.current) clearInterval(timerRef.current);
+      return;
+    }
+    const update = () => {
+      const left = Math.max(0, Math.floor((qrData.expiresAt - Date.now()) / 1000));
+      setTimeLeft(left);
+      if (left <= 0 && timerRef.current) {
+        clearInterval(timerRef.current);
+        setQrData(null);
+        setQrRaw("");
+      }
+    };
+    update();
+    timerRef.current = setInterval(update, 1000);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [qrData]);
+
+  const addItem = () => setItems((prev) => [...prev, { name: "", price: "" }]);
+  const removeItem = (idx: number) =>
+    setItems((prev) => prev.filter((_, i) => i !== idx));
+  const updateItem = (idx: number, field: "name" | "price", value: string) => {
+    setItems((prev) =>
+      prev.map((item, i) => (i === idx ? { ...item, [field]: value } : item))
+    );
+  };
+
+  const handleGenerateQR = async () => {
+    setError("");
+    if (!wallet.address) {
+      setError(t("payment.error.connectWallet"));
+      return;
+    }
+    if (total <= 0) {
+      setError(t("payment.error.minAmount"));
+      return;
+    }
+
+    const validItems = items.filter((i) => i.name.trim() && parseFloat(i.price) > 0);
+    if (validItems.length === 0) {
+      setError(t("payment.error.noItems"));
+      return;
+    }
+
+    const amountInUnits = Math.floor(total * 1_000_000).toString();
+
+    setApproving(true);
+    try {
+      const provider = resolveProvider(wallet.walletId!);
+      if (!provider) throw new Error("Provider not found");
+
+      const txHash = (await provider.request({
+        method: "eth_sendTransaction",
+        params: [{
+          from: wallet.address,
+          to: USDC_ADDRESS,
+          data: encodeApprove(wallet.address, amountInUnits),
+        }],
+      })) as string;
+
+      setApproveTx(txHash);
+      await new Promise((r) => setTimeout(r, 3000));
+
+      const data: QRData = {
+        payerAddress: wallet.address,
+        totalAmount: amountInUnits,
+        items: validItems.map((i) => ({ name: i.name, price: parseFloat(i.price) })),
+        category,
+        timestamp: Date.now(),
+        expiresAt: Date.now() + 3 * 60 * 1000,
+        nonce: generateNonce(),
+      };
+
+      const raw = encodeQR(data);
+      setQrData(data);
+      setQrRaw(raw);
+    } catch (err) {
+      setError((err as Error).message || t("payment.error.approveFailed"));
+    } finally {
+      setApproving(false);
+    }
+  };
+
+  const handleScan = () => {
+    setError("");
+    const data = decodeQR(scanInput.trim());
+    if (!data) {
+      setError(t("payment.error.invalidQR"));
+      return;
+    }
+    if (Date.now() > data.expiresAt) {
+      setError(t("payment.error.qrExpired"));
+      return;
+    }
+    setScannedData(data);
+  };
+
+  const handleTransferFrom = async () => {
+    if (!scannedData || !wallet.address) return;
+    setError("");
+    setTransferring(true);
+
+    try {
+      const provider = resolveProvider(wallet.walletId!);
+      if (!provider) throw new Error("Provider not found");
+
+      const txHash = (await provider.request({
+        method: "eth_sendTransaction",
+        params: [{
+          from: wallet.address,
+          to: USDC_ADDRESS,
+          data: encodeTransferFrom(
+            scannedData.payerAddress,
+            wallet.address,
+            scannedData.totalAmount
+          ),
+        }],
+      })) as string;
+
+      await new Promise((r) => setTimeout(r, 4000));
+
+      const receipt = await provider.request({
+        method: "eth_getTransactionReceipt",
+        params: [txHash],
+      }) as { blockHash: string; blockNumber: string; status: string } | null;
+
+      const tx: Transaction = {
+        id: generateNonce(),
+        payer_address: scannedData.payerAddress,
+        payee_address: wallet.address,
+        amount: parseFloat(scannedData.totalAmount) / 1_000_000,
+        category: scannedData.category,
+        items: scannedData.items,
+        tx_hash: txHash,
+        block_hash: receipt?.blockHash || "",
+        block_number: receipt ? parseInt(receipt.blockNumber, 16) : 0,
+        status: receipt && receipt.status === "0x1" ? "confirmed" : "pending",
+        mode: "receive",
+        created_at: new Date().toISOString(),
+      };
+
+      await saveTransaction(tx);
+      setSuccessTx(tx);
+      setScannedData(null);
+      setScanInput("");
+    } catch (err) {
+      setError((err as Error).message || t("payment.error.transferFailed"));
+    } finally {
+      setTransferring(false);
+    }
+  };
+
+  const copyQR = () => {
+    if (qrRaw) navigator.clipboard.writeText(qrRaw);
+  };
+
+  if (!wallet.address) {
+    return (
+      <section className="relative mx-auto max-w-2xl px-5 py-24">
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-ink-line/40 bg-ink-2/30 p-12 text-center">
+          <Wallet className="h-12 w-12 text-text-muted" />
+          <h2 className="mt-4 font-display text-xl font-semibold">{t("payment.connectFirst")}</h2>
+          <p className="mt-2 text-sm text-text-muted">{t("payment.connectDesc")}</p>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="relative mx-auto max-w-2xl px-5 py-12">
+      <div className="mb-8">
+        <div className="inline-flex items-center gap-2 rounded-full border border-ink-line/40 bg-ink-2/50 px-3 py-1 text-[11px] font-mono uppercase tracking-widest text-text-muted">
+          <Receipt className="h-3 w-3" />
+          {t("payment.eyebrow")}
+        </div>
+        <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight">{t("payment.title")}</h1>
+        <p className="mt-2 text-text-muted">{t("payment.desc")}</p>
+      </div>
+
+      <div className="flex rounded-xl border border-ink-line/40 bg-ink-2/30 p-1">
+        {(["bayar", "terima"] as Tab[]).map((tKey) => (
+          <button
+            key={tKey}
+            onClick={() => {
+              setTab(tKey);
+              setError("");
+              setSuccessTx(null);
+            }}
+            className={cn(
+              "flex flex-1 items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-medium transition-all duration-300",
+              tab === tKey
+                ? "bg-accent text-white shadow-sm shadow-accent/20"
+                : "text-text-muted hover:text-text"
+            )}
+          >
+            {tKey === "bayar" ? <QrCode className="h-4 w-4" /> : <Camera className="h-4 w-4" />}
+            {t(`payment.tab.${tKey}`)}
+          </button>
+        ))}
+      </div>
+
+      {error && (
+        <div className="mt-4 flex items-center gap-2 rounded-xl border border-warn-amber/40 bg-warn-amber/10 px-4 py-3 text-sm text-warn-amber">
+          <AlertTriangle className="h-4 w-4 shrink-0" />
+          {error}
+        </div>
+      )}
+
+      {tab === "bayar" && (
+        <div className="mt-6 space-y-6">
+          {!qrData ? (
+            <>
+              <div className="rounded-2xl border border-ink-line/40 bg-ink p-6">
+                <h3 className="font-display text-sm font-semibold">{t("payment.items")}</h3>
+                <div className="mt-4 space-y-3">
+                  {items.map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-3">
+                      <input
+                        type="text"
+                        placeholder={t("payment.itemName")}
+                        value={item.name}
+                        onChange={(e) => updateItem(idx, "name", e.target.value)}
+                        className="flex-1 rounded-lg border border-ink-line/50 bg-ink-2 px-3 py-2 text-sm text-text placeholder:text-text-faint outline-none focus:border-accent transition-colors"
+                      />
+                      <input
+                        type="number"
+                        placeholder="0"
+                        value={item.price}
+                        onChange={(e) => updateItem(idx, "price", e.target.value)}
+                        className="w-28 rounded-lg border border-ink-line/50 bg-ink-2 px-3 py-2 text-sm text-text placeholder:text-text-faint outline-none focus:border-accent transition-colors"
+                      />
+                      {items.length > 1 && (
+                        <button
+                          onClick={() => removeItem(idx)}
+                          className="flex h-9 w-9 items-center justify-center rounded-lg border border-ink-line/40 text-text-muted hover:text-warn-amber hover:border-warn-amber/40 transition-all"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={addItem}
+                  className="mt-3 inline-flex items-center gap-1.5 text-sm text-accent hover:text-accent-strong transition-colors"
+                >
+                  <Plus className="h-4 w-4" />
+                  {t("payment.addItem")}
+                </button>
+
+                <div className="mt-4 border-t border-ink-line/30 pt-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-text-muted">{t("payment.total")}</span>
+                    <span className="font-display text-xl font-semibold">{formatUSDC(total)} USDC</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-ink-line/40 bg-ink p-6">
+                <h3 className="font-display text-sm font-semibold">{t("payment.category")}</h3>
+                <div className="mt-3 grid grid-cols-3 gap-2">
+                  {CATEGORIES.map((cat) => (
+                    <button
+                      key={cat.id}
+                      onClick={() => setCategory(cat.id)}
+                      className={cn(
+                        "flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm transition-all duration-200",
+                        category === cat.id
+                          ? "border-accent bg-accent/10 text-accent"
+                          : "border-ink-line/40 bg-ink-2 text-text-muted hover:border-ink-line hover:text-text"
+                      )}
+                    >
+                      <span>{cat.icon}</span>
+                      <span className="capitalize">{t(`payment.cat.${cat.id}`)}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <button
+                onClick={handleGenerateQR}
+                disabled={approving || total <= 0}
+                className={cn(
+                  "flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-6 py-3.5 text-sm font-medium text-white transition-all duration-300",
+                  "hover:bg-accent-strong hover:shadow-lg hover:shadow-accent/20",
+                  "disabled:opacity-60 disabled:cursor-not-allowed"
+                )}
+              >
+                {approving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {t("payment.approving")}
+                  </>
+                ) : (
+                  <>
+                    <QrCode className="h-4 w-4" />
+                    {t("payment.generateQR")}
+                  </>
+                )}
+              </button>
+            </>
+          ) : (
+            <div className="rounded-2xl border border-ink-line/40 bg-ink p-8 text-center">
+              <div className="mx-auto w-full max-w-xs">
+                <div className="relative mx-auto aspect-square w-full max-w-[280px] rounded-xl bg-white p-4">
+                  <div className="grid h-full w-full" style={{ gridTemplateColumns: "repeat(16, 1fr)", gap: "1px" }}>
+                    {Array.from({ length: 256 }).map((_, i) => {
+                      const filled = qrRaw.charCodeAt(i % Math.max(qrRaw.length, 1)) % 2 === 0;
+                      return (
+                        <span
+                          key={i}
+                          className={cn(
+                            "aspect-square rounded-[1px]",
+                            filled ? "bg-paper-ink" : "bg-transparent"
+                          )}
+                        />
+                      );
+                    })}
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white shadow-lg">
+                      <span className="font-display text-lg font-bold text-paper-ink">N</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 flex items-center justify-center gap-2 text-sm text-text-muted">
+                  <Clock className="h-4 w-4" />
+                  <span>
+                    {t("payment.expiresIn")}{" "}
+                    <span className={cn("font-mono font-medium", timeLeft < 30 && "text-warn-amber")}>
+                      {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, "0")}
+                    </span>
+                  </span>
+                </div>
+
+                <button
+                  onClick={copyQR}
+                  className="mt-3 inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-accent transition-colors"
+                >
+                  <Copy className="h-3 w-3" />
+                  {t("payment.copyQR")}
+                </button>
+
+                <div className="mt-6 rounded-xl border border-ink-line/30 bg-ink-2/50 p-4 text-left">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-text-muted">{t("payment.total")}</span>
+                    <span className="font-medium">{formatUSDC(parseInt(qrData.totalAmount) / 1_000_000)} USDC</span>
+                  </div>
+                  <div className="mt-2 flex justify-between text-sm">
+                    <span className="text-text-muted">{t("payment.category")}</span>
+                    <span className="font-medium capitalize">{t(`payment.cat.${qrData.category}`)}</span>
+                  </div>
+                  {approveTx && (
+                    <a
+                      href={`${ARC_EXPLORER_URL}/tx/${approveTx}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-3 flex items-center gap-1.5 text-xs text-accent hover:text-accent-strong transition-colors"
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                      {t("payment.viewApprove")}
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === "terima" && (
+        <div className="mt-6 space-y-6">
+          {!scannedData && !successTx ? (
+            <div className="rounded-2xl border border-ink-line/40 bg-ink p-6">
+              <h3 className="font-display text-sm font-semibold">{t("payment.scanQR")}</h3>
+              <p className="mt-1 text-xs text-text-muted">{t("payment.scanDesc")}</p>
+              <textarea
+                value={scanInput}
+                onChange={(e) => setScanInput(e.target.value)}
+                placeholder={t("payment.scanPlaceholder")}
+                rows={4}
+                className="mt-4 w-full rounded-lg border border-ink-line/50 bg-ink-2 px-4 py-3 text-sm text-text placeholder:text-text-faint outline-none focus:border-accent transition-colors resize-none font-mono"
+              />
+              <button
+                onClick={handleScan}
+                disabled={!scanInput.trim()}
+                className={cn(
+                  "mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-6 py-3.5 text-sm font-medium text-white transition-all duration-300",
+                  "hover:bg-accent-strong hover:shadow-lg hover:shadow-accent/20",
+                  "disabled:opacity-60 disabled:cursor-not-allowed"
+                )}
+              >
+                <Camera className="h-4 w-4" />
+                {t("payment.scanButton")}
+              </button>
+            </div>
+          ) : scannedData && !successTx ? (
+            <div className="rounded-2xl border border-ink-line/40 bg-ink p-6">
+              <h3 className="font-display text-sm font-semibold">{t("payment.confirmTitle")}</h3>
+
+              <div className="mt-4 space-y-3 rounded-xl border border-ink-line/30 bg-ink-2/50 p-4">
+                <div className="flex justify-between text-sm">
+                  <span className="text-text-muted">{t("payment.from")}</span>
+                  <span className="font-mono text-xs">{scannedData.payerAddress.slice(0, 8)}…{scannedData.payerAddress.slice(-6)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-text-muted">{t("payment.total")}</span>
+                  <span className="font-display text-lg font-semibold text-accent">
+                    {formatUSDC(parseInt(scannedData.totalAmount) / 1_000_000)} USDC
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-text-muted">{t("payment.category")}</span>
+                  <span className="capitalize">{t(`payment.cat.${scannedData.category}`)}</span>
+                </div>
+                <div className="border-t border-ink-line/20 pt-3">
+                  <p className="text-xs text-text-muted mb-2">{t("payment.items")}</p>
+                  {scannedData.items.map((item, i) => (
+                    <div key={i} className="flex justify-between text-sm">
+                      <span className="text-text-muted">{item.name}</span>
+                      <span>{formatUSDC(item.price)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-6 flex gap-3">
+                <button
+                  onClick={() => { setScannedData(null); setScanInput(""); }}
+                  className="flex-1 rounded-xl border border-ink-line/40 px-4 py-3 text-sm text-text-muted hover:text-text hover:bg-ink-2 transition-all"
+                >
+                  {t("payment.cancel")}
+                </button>
+                <button
+                  onClick={handleTransferFrom}
+                  disabled={transferring}
+                  className={cn(
+                    "flex flex-[2] items-center justify-center gap-2 rounded-xl bg-stamp-green px-4 py-3 text-sm font-medium text-white transition-all duration-300",
+                    "hover:bg-stamp-green/90 hover:shadow-lg hover:shadow-stamp-green/20",
+                    "disabled:opacity-60 disabled:cursor-not-allowed"
+                  )}
+                >
+                  {transferring ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      {t("payment.processing")}
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="h-4 w-4" />
+                      {t("payment.confirmReceive")}
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          ) : successTx ? (
+            <div className="rounded-2xl border border-stamp-green/30 bg-stamp-green/5 p-8 text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-stamp-green/15">
+                <CheckCircle2 className="h-8 w-8 text-stamp-green" />
+              </div>
+              <h3 className="mt-4 font-display text-xl font-semibold">{t("payment.successTitle")}</h3>
+              <p className="mt-1 text-sm text-text-muted">{t("payment.successDesc")}</p>
+
+              <div className="mt-6 space-y-2 rounded-xl border border-ink-line/30 bg-ink p-4 text-left">
+                <div className="flex justify-between text-sm">
+                  <span className="text-text-muted">{t("payment.amount")}</span>
+                  <span className="font-medium">{formatUSDC(successTx.amount)} USDC</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-text-muted">{t("payment.txHash")}</span>
+                  <a
+                    href={`${ARC_EXPLORER_URL}/tx/${successTx.tx_hash}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-mono text-xs text-accent hover:text-accent-strong transition-colors"
+                  >
+                    {successTx.tx_hash.slice(0, 10)}…{successTx.tx_hash.slice(-8)}
+                  </a>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-text-muted">{t("payment.blockHash")}</span>
+                  <span className="font-mono text-xs text-text-faint">
+                    {successTx.block_hash ? `${successTx.block_hash.slice(0, 10)}…` : "—"}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-text-muted">{t("payment.blockNumber")}</span>
+                  <span className="font-mono text-xs">{successTx.block_number}</span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => { setSuccessTx(null); setScannedData(null); setScanInput(""); }}
+                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-accent px-6 py-3 text-sm font-medium text-white hover:bg-accent-strong transition-all"
+              >
+                <Receipt className="h-4 w-4" />
+                {t("payment.newTransaction")}
+              </button>
+            </div>
+          ) : null}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function resolveProvider(id: string) {
+  if (typeof window === "undefined") return undefined;
+  if (id === "okx") {
+    return (window as any).okxwallet?.ethereum ?? (window as any).okxwallet;
+  }
+  const eth = (window as any).ethereum;
+  if (!eth) return undefined;
+  if (Array.isArray(eth.providers)) {
+    return eth.providers.find((p: any) => p.isMetaMask);
+  }
+  return eth.isMetaMask ? eth : undefined;
+}

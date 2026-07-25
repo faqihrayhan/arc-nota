@@ -41,6 +41,7 @@ export function FeatureSection() {
       description: t("features.payment.desc"),
       iconColor: "text-paper-ink",
       bgGlow: "bg-paper-white/5",
+      href: "/payment",
     },
     {
       id: "analisa",
@@ -49,6 +50,7 @@ export function FeatureSection() {
       description: t("features.analisa.desc"),
       iconColor: "text-pink-400",
       bgGlow: "bg-paper-pink/5",
+      href: "/analisa",
     },
     {
       id: "forecast",
@@ -57,6 +59,7 @@ export function FeatureSection() {
       description: t("features.forecast.desc"),
       iconColor: "text-amber-400",
       bgGlow: "bg-paper-yellow/5",
+      href: "/forecast",
     },
   ];
 
@@ -81,18 +84,18 @@ export function FeatureSection() {
             const Icon = iconMap[f.id];
             const isVisible = visibleCards.has(i);
             return (
-              <div
+              <a
                 key={f.id}
-                id={f.id}
+                href={f.href}
                 data-index={i}
-                className={cn("group relative scroll-mt-28 overflow-hidden rounded-2xl border border-ink-line/40 bg-ink transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]", isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12")}
+                className={cn("group relative scroll-mt-28 overflow-hidden rounded-2xl border border-ink-line/40 bg-ink transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-ink-line/70 hover:shadow-lg hover:shadow-black/10", isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12")}
                 style={{ transitionDelay: `${i * 150}ms` }}
               >
                 <div className={`h-1 w-full ${f.ply}`} />
                 <div className={cn("absolute -right-20 -top-20 h-40 w-40 rounded-full blur-[60px] transition-opacity duration-500 opacity-0 group-hover:opacity-100", f.bgGlow)} />
                 <div className="relative p-7">
                   <div className="flex items-center justify-between">
-                    <span className="rounded-full border border-ink-line/40 bg-ink-2/60 px-2.5 py-0.5 text-[10px] font-medium text-text-faint">{t("features.comingSoon")}</span>
+                    <span className="rounded-full border border-ink-line/40 bg-ink-2/60 px-2.5 py-0.5 text-[10px] font-medium text-text-faint">{t("features.tryNow")}</span>
                   </div>
                   <div className="mt-6 flex h-12 w-12 items-center justify-center rounded-xl bg-ink-2 border border-ink-line/30 transition-all duration-300 group-hover:scale-110 group-hover:border-ink-line/50">
                     <Icon className={cn("h-5 w-5", f.iconColor)} />
@@ -100,11 +103,11 @@ export function FeatureSection() {
                   <h3 className="mt-5 font-display text-xl font-semibold tracking-tight">{f.title}</h3>
                   <p className="mt-3 text-sm leading-relaxed text-text-muted">{f.description}</p>
                   <div className="mt-5 flex items-center gap-1.5 text-sm text-text-faint transition-all duration-300 group-hover:text-accent">
-                    <span className="font-medium">Learn more</span>
+                    <span className="font-medium">{t("features.open")}</span>
                     <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
                   </div>
                 </div>
-              </div>
+              </a>
             );
           })}
         </div>

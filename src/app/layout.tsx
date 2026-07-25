@@ -7,9 +7,7 @@ import "@fontsource/ibm-plex-sans/500.css";
 import "@fontsource/ibm-plex-sans/600.css";
 import "@fontsource/ibm-plex-mono/400.css";
 import "@fontsource/ibm-plex-mono/500.css";
-import { ThemeProvider } from "next-themes";
-import { WalletProvider } from "@/context/WalletContext";
-import { LanguageProvider } from "@/context/LanguageContext";
+import { Providers } from "@/components/Providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -29,13 +27,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" className="h-full antialiased" suppressHydrationWarning>
+    <html lang="id" className="h-full antialiased dark" suppressHydrationWarning>
       <body className="min-h-full flex flex-col bg-ink text-text">
-        <ThemeProvider attribute="class" defaultTheme="dark">
-          <LanguageProvider>
-            <WalletProvider>{children}</WalletProvider>
-          </LanguageProvider>
-        </ThemeProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
