@@ -41,11 +41,11 @@ support are already live.
 ## Tech Stack
 
 - **Next.js 16** (App Router, Turbopack) + **TypeScript**
-- **Tailwind CSS v4** — semua warna lewat CSS variable
-- **next-themes** — dark/light mode
-- **Wallet** — EIP-1193 custom (MetaMask & OKX), bukan wagmi/viem
-- **i18n** — custom dictionary (ID/EN)
-- **Database** — Supabase (dengan localStorage fallback)
+- **Tailwind CSS v4**  
+- **next-themes**  dark/light mode
+- **Wallet**  EIP-1193 custom (MetaMask & OKX)
+- **i18n** custom dictionary (ID/EN)
+- **Database** Supabase (with localStorage fallback)
 
 ---
 
