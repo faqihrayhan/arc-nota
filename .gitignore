@@ -23,6 +23,9 @@
 # misc
 .DS_Store
 *.pem
+Thumbs.db
+ehthumbs.db
+Desktop.ini
 
 # debug
 npm-debug.log*
@@ -30,7 +33,7 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files
 .env*
 
 # vercel
@@ -38,16 +41,28 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts
 
-# Mengabaikan semua file duplikat/cadangan
+# patch files
+*.patch
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# backup & docs internal
 *.backup
-
-# Backup files
 **/*.backup
-src/components/backup/
-src/app/backup/
+AGENTS.md
 CLAUDE.md
 PRD.md
-AGENTS.md
 README.md.backup
+
+# ============================================
+# Supabase
+# ============================================
+**/supabase/.branches
+**/supabase/.temp
+supabase/volumes/
