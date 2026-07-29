@@ -1,10 +1,15 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useWallet } from "@/context/WalletContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { USDC_ADDRESS } from "@/lib/usdc-abi";
-import { saveTransaction, type Transaction } from "@/lib/supabase";
+import {
+  saveTransaction,
+  findTransactionByNonce,
+  subscribeToTransactions,
+  type Transaction,
+} from "@/lib/supabase";
 import { ARC_EXPLORER_URL } from "@/lib/arc-chain";
 import { QRScanner } from "@/components/QRScanner";
 import { cn } from "@/lib/utils";
@@ -95,6 +100,7 @@ export default function PaymentPage() {
   const [category, setCategory] = useState("makan");
   const [qrData, setQrData] = useState<QRData | null>(null);
   const [qrRaw, setQrRaw] = useState("");
+  const [paidTx, setPaidTx] = useState<Transaction | null>(null);
   const [approving, setApproving] = useState(false);
   const [approveTx, setApproveTx] = useState("");
   const [timeLeft, setTimeLeft] = useState(0);
@@ -131,6 +137,36 @@ export default function PaymentPage() {
     timerRef.current = setInterval(update, 1000);
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [qrData]);
+
+  // Selama QR sedang tampil (menunggu di-scan), cek berkala apakah sudah
+  // ada transaksi dengan nonce yang sama di database. Kalau Supabase aktif,
+  // ini juga dibantu channel realtime supaya update-nya nyaris instan
+  // (tidak perlu nunggu jadwal polling berikutnya).
+  useEffect(() => {
+    if (!qrData) return;
+
+    let cancelled = false;
+    const nonce = qrData.nonce;
+
+    async function checkPaid() {
+      const found = await findTransactionByNonce(nonce);
+      if (found && !cancelled) {
+        setPaidTx(found);
+        setQrData(null);
+        setQrRaw("");
+      }
+    }
+
+    checkPaid();
+    const pollId = setInterval(checkPaid, 3000);
+    const unsubscribe = subscribeToTransactions(checkPaid);
+
+    return () => {
+      cancelled = true;
+      clearInterval(pollId);
+      unsubscribe();
     };
   }, [qrData]);
 
@@ -252,9 +288,18 @@ export default function PaymentPage() {
         tx_hash: txHash,
         block_hash: receipt?.blockHash || "",
         block_number: receipt ? parseInt(receipt.blockNumber, 16) : 0,
-        status: receipt && receipt.status === "0x1" ? "confirmed" : "pending",
+        // Kalau receipt sudah ada tapi status-nya BUKAN "0x1", itu berarti
+        // transaksinya di-mining tapi REVERT (gagal di smart contract) —
+        // ini harus ditandai "failed", bukan disamakan dengan "pending"
+        // (yang harusnya cuma untuk transaksi yang belum ke-mining sama sekali).
+        status: !receipt
+          ? "pending"
+          : receipt.status === "0x1"
+          ? "confirmed"
+          : "failed",
         mode: "receive",
         created_at: new Date().toISOString(),
+        nonce: scannedData.nonce,
       };
 
       await saveTransaction(tx);
@@ -271,6 +316,36 @@ export default function PaymentPage() {
   const copyQR = () => {
     if (qrRaw) navigator.clipboard.writeText(qrRaw);
   };
+
+  // Referensi function ini HARUS stabil (tidak dibuat ulang tiap render).
+  // Kalau tidak, useEffect di QRScanner (yang dependency-nya [onScan])
+  // akan mengira propnya berubah tiap kali timer `timeLeft` tick,
+  // lalu mematikan & menyalakan ulang kamera tiap detik — akibatnya
+  // kamera tidak pernah sempat mendeteksi QR code.
+  const handleQRDetected = useCallback(
+    (data: string) => {
+      setScanInput(data);
+      setCameraOpen(false);
+      setTimeout(() => {
+        try {
+          const decoded = decodeQR(data.trim());
+          if (decoded && Date.now() <= decoded.expiresAt) {
+            setScannedData(decoded);
+            setError("");
+          } else if (decoded) {
+            setError(t("payment.error.qrExpired"));
+          } else {
+            setError(t("payment.error.invalidQR"));
+          }
+        } catch {
+          setError(t("payment.error.invalidQR"));
+        }
+      }, 100);
+    },
+    [t]
+  );
+
+  const closeCamera = useCallback(() => setCameraOpen(false), []);
 
   if (!wallet.address) {
     return (
@@ -326,7 +401,35 @@ export default function PaymentPage() {
 
       {tab === "bayar" && (
         <div className="mt-6 space-y-6">
-          {!qrData ? (
+          {paidTx ? (
+            <div className="rounded-2xl border border-stamp-green/40 bg-stamp-green/5 p-8 text-center">
+              <CheckCircle2 className="mx-auto h-10 w-10 text-stamp-green" />
+              <h3 className="mt-4 font-display text-lg font-semibold">
+                {t("payment.paidSuccess")}
+              </h3>
+              <p className="mt-1 text-sm text-text-muted">
+                {formatUSDC(paidTx.amount)} USDC
+              </p>
+              <a
+                href={`${ARC_EXPLORER_URL}/tx/${paidTx.tx_hash}`}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-3 inline-flex items-center gap-1.5 text-xs text-accent hover:text-accent-strong transition-colors"
+              >
+                <ExternalLink className="h-3 w-3" />
+                {t("payment.viewApprove")}
+              </a>
+              <div>
+                <button
+                  onClick={() => setPaidTx(null)}
+                  className="mt-6 inline-flex items-center gap-2 rounded-xl bg-accent px-6 py-3 text-sm font-medium text-white hover:bg-accent-strong transition-all"
+                >
+                  <Receipt className="h-4 w-4" />
+                  {t("payment.newTransaction")}
+                </button>
+              </div>
+            </div>
+          ) : !qrData ? (
             <>
               <div className="rounded-2xl border border-ink-line/40 bg-ink p-6">
                 <h3 className="font-display text-sm font-semibold">{t("payment.items")}</h3>
@@ -639,28 +742,7 @@ export default function PaymentPage() {
         </div>
       )}
       {cameraOpen && (
-        <QRScanner
-          onScan={(data) => {
-            setScanInput(data);
-            setCameraOpen(false);
-            setTimeout(() => {
-              try {
-                const decoded = decodeQR(data.trim());
-                if (decoded && Date.now() <= decoded.expiresAt) {
-                  setScannedData(decoded);
-                  setError("");
-                } else if (decoded) {
-                  setError(t("payment.error.qrExpired"));
-                } else {
-                  setError(t("payment.error.invalidQR"));
-                }
-              } catch {
-                setError(t("payment.error.invalidQR"));
-              }
-            }, 100);
-          }}
-          onClose={() => setCameraOpen(false)}
-        />
+        <QRScanner onScan={handleQRDetected} onClose={closeCamera} />
       )}
     </section>
   );

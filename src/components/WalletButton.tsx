@@ -36,7 +36,28 @@ export function WalletButton({ compact = false }: { compact?: boolean }) {
   const wallet = useWallet();
   const { t } = useLanguage();
   const [open, setOpen] = useState(false);
+  const [switching, setSwitching] = useState(false);
+  const [switchError, setSwitchError] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
+
+  const handleSwitchNetwork = async () => {
+    setSwitching(true);
+    setSwitchError("");
+    try {
+      await wallet.switchToArc();
+    } catch (err) {
+      const msg = (err as Error)?.message;
+      if (msg === "no_provider") {
+        setSwitchError(t("wallet.noProviderMobile"));
+      } else if ((err as { code?: number })?.code === 4001) {
+        setSwitchError(t("wallet.rejected"));
+      } else {
+        setSwitchError(t("wallet.switchFailed"));
+      }
+    } finally {
+      setSwitching(false);
+    }
+  };
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
@@ -57,14 +78,26 @@ export function WalletButton({ compact = false }: { compact?: boolean }) {
   if (wallet.status === "connected" && wallet.address) {
     if (!wallet.isCorrectNetwork) {
       return (
-        <button
-          onClick={() => wallet.switchToArc()}
-          className="group flex items-center gap-2 rounded-xl border border-warn-amber/50 bg-warn-amber/10 px-4 py-2.5 text-sm font-medium text-warn-amber transition-all duration-300 hover:bg-warn-amber/20 hover:border-warn-amber/70"
-        >
-          <AlertTriangle className="h-4 w-4" />
-          <span className="hidden sm:inline">{t("wallet.switchNetwork")}</span>
-          <span className="sm:hidden">Switch</span>
-        </button>
+        <div className="relative">
+          <button
+            onClick={handleSwitchNetwork}
+            disabled={switching}
+            className="group flex items-center gap-2 rounded-xl border border-warn-amber/50 bg-warn-amber/10 px-4 py-2.5 text-sm font-medium text-warn-amber transition-all duration-300 hover:bg-warn-amber/20 hover:border-warn-amber/70 disabled:opacity-60"
+          >
+            {switching ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <AlertTriangle className="h-4 w-4" />
+            )}
+            <span className="hidden sm:inline">{t("wallet.switchNetwork")}</span>
+            <span className="sm:hidden">Switch</span>
+          </button>
+          {switchError && (
+            <p className="absolute right-0 top-full z-50 mt-1.5 w-56 rounded-lg border border-warn-amber/40 bg-ink-2 px-3 py-2 text-xs text-warn-amber shadow-xl">
+              {switchError}
+            </p>
+          )}
+        </div>
       );
     }
 
@@ -91,7 +124,12 @@ export function WalletButton({ compact = false }: { compact?: boolean }) {
         </button>
 
         {open && (
-          <div className="absolute right-0 z-50 mt-2 w-60 overflow-hidden rounded-2xl border border-ink-line/50 bg-ink-2 shadow-2xl shadow-black/40">
+          <div
+            className={cn(
+              "z-50 mt-2 overflow-hidden rounded-2xl border border-ink-line/50 bg-ink-2 shadow-2xl shadow-black/40",
+              compact ? "relative w-full" : "absolute right-0 w-60"
+            )}
+          >
             <div className="border-b border-ink-line/30 px-4 py-3">
               <p className="text-[11px] uppercase tracking-wider text-text-faint">
                 {t("wallet.connectedVia")}
@@ -152,7 +190,16 @@ export function WalletButton({ compact = false }: { compact?: boolean }) {
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-64 overflow-hidden rounded-2xl border border-ink-line/50 bg-ink-2 shadow-2xl shadow-black/40">
+        <div
+          className={cn(
+            "z-50 mt-2 overflow-hidden rounded-2xl border border-ink-line/50 bg-ink-2 shadow-2xl shadow-black/40",
+            // Di mode compact (dipakai di menu mobile), dropdown ini duduk
+            // di alur normal halaman (w-full, tanpa `absolute`) supaya
+            // tidak terpotong oleh parent yang punya `overflow-hidden`.
+            // Di desktop tetap melayang (`absolute`) di kanan tombol.
+            compact ? "relative w-full" : "absolute right-0 w-64"
+          )}
+        >
           <div className="border-b border-ink-line/30 px-4 py-3">
             <p className="text-[11px] uppercase tracking-wider text-text-faint">
               {t("wallet.pick")}

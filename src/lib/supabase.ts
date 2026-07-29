@@ -30,7 +30,45 @@ export type Transaction = {
   mode: "payment" | "receive";
   created_at: string;
   expires_at?: string;
+  // nonce dari QR yang di-scan — dipakai sisi generator untuk tahu
+  // QR mana yang baru saja "lunas" tanpa harus reload manual.
+  nonce?: string;
 };
+
+// Dipanggil sisi yang men-generate QR untuk cek apakah nonce tertentu
+// sudah punya transaksi yang cocok (artinya sudah dibayar).
+export async function findTransactionByNonce(
+  nonce: string
+): Promise<Transaction | null> {
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("transactions")
+      .select("*")
+      .eq("nonce", nonce)
+      .maybeSingle();
+    if (error) return null;
+    return data;
+  }
+  return getLocalTransactions().find((t) => t.nonce === nonce) || null;
+}
+
+// Berlangganan perubahan tabel transactions secara realtime (kalau Supabase
+// aktif). Mengembalikan function `unsubscribe` untuk dipanggil saat komponen
+// unmount, supaya tidak ada listener yang "nyangkut".
+export function subscribeToTransactions(onInsert: () => void): () => void {
+  if (!supabase) return () => {};
+  const channel = supabase
+    .channel("transactions-changes")
+    .on(
+      "postgres_changes",
+      { event: "INSERT", schema: "public", table: "transactions" },
+      onInsert
+    )
+    .subscribe();
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}
 
 export async function saveTransaction(tx: Transaction): Promise<void> {
   if (supabase) {

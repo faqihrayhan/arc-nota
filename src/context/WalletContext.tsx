@@ -75,9 +75,14 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const switchToArc = useCallback(async () => {
-    if (!state.walletId) return;
+    if (!state.walletId) throw new Error("no_wallet");
     const provider = resolveProvider(state.walletId);
-    if (!provider) return;
+    if (!provider) {
+      // Ini biasanya kejadian di HP: tidak ada ekstensi wallet yang
+      // "nyuntik" window.ethereum di browser biasa. Lempar error yang
+      // jelas supaya UI bisa kasih tahu user, bukan diam saja.
+      throw new Error("no_provider");
+    }
 
     try {
       await provider.request({
