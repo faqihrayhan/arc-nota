@@ -73,7 +73,7 @@ export default function AnalisaPage() {
   }, [wallet.address]);
 
    // Demo Data jika wallet belum terhubung
-  const DEMO_TRANSACTIONS: Transaction[] = [
+    const DEMO_TRANSACTIONS: Transaction[] = [
     {
       id: "demo-1",
       payer_address: "0xdemo...1234",
@@ -86,7 +86,7 @@ export default function AnalisaPage() {
       block_number: 55000000,
       status: "confirmed",
       mode: "payment",
-      created_at: new Date().toISOString(),
+      created_at: "2026-08-01T10:00:00.000Z",
     },
     {
       id: "demo-2",
@@ -100,9 +100,10 @@ export default function AnalisaPage() {
       block_number: 55000001,
       status: "confirmed",
       mode: "payment",
-      created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
+      created_at: "2026-07-30T10:00:00.000Z",
     },
   ];
+
 
   const activeTransactions = wallet.address ? transactions : DEMO_TRANSACTIONS;
   const currentAddr = (wallet.address || "0xdemo...1234").toLowerCase();

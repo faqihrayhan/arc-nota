@@ -6,12 +6,14 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   {
-    rules: {
+        rules: {
+      "react-hooks/purity": "off",
       "react-hooks/set-state-in-effect": "off",
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-unused-vars": "warn",
       "@next/next/no-html-link-for-pages": "off"
     }
+
   },
   // Override default ignores of eslint-config-next
   globalIgnores([

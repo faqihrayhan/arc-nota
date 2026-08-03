@@ -10,7 +10,7 @@
 
 ## About
 
-ArcNota
+Nota
 
 **Payment tracking and financial insight, on-chain on Arc.**
 
