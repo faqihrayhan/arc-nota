@@ -72,8 +72,15 @@ export default function AnalisaPage() {
       .catch(() => setLoading(false));
   }, [wallet.address]);
 
+   const currentAddr = (wallet.address || "").toLowerCase();
   const periodStart = getPeriodStart(period);
-  const filtered = transactions.filter((t) => new Date(t.created_at) >= periodStart);
+  
+  // Tambahin filter: Cuma ambil transaksi kalau wallet ini adalah PENGIRIM (payer_address)
+  const filtered = transactions.filter((t) => {
+    const isPayer = t.payer_address.toLowerCase() === currentAddr;
+    const isWithinPeriod = new Date(t.created_at) >= periodStart;
+    return isPayer && isWithinPeriod;
+  });
 
   const byCategory = filtered.reduce((acc, tx) => {
     const cat = tx.category || "lainnya";
