@@ -251,69 +251,75 @@ export default function PaymentPage() {
     setScannedData(data);
   };
 
-  const handleTransferFrom = async () => {
-    if (!scannedData || !wallet.address) return;
-    setError("");
-    setTransferring(true);
+// Ganti fungsi handleTransferFrom dengan versi aman ini:
+const handleTransferFrom = async () => {
+  if (!scannedData || !wallet.address) return;
+  setError("");
+  setTransferring(true);
 
-    try {
-      const provider = resolveProvider(wallet.walletId!);
-      if (!provider) throw new Error("Provider not found");
+  try {
+    const provider = resolveProvider(wallet.walletId!);
+    if (!provider) throw new Error("Provider wallet tidak ditemukan");
 
-      const txHash = (await provider.request({
-        method: "eth_sendTransaction",
-        params: [{
-          from: wallet.address,
-          to: USDC_ADDRESS,
-          data: encodeTransferFrom(
-            scannedData.payerAddress,
-            wallet.address,
-            scannedData.totalAmount
-          ),
-        }],
-      })) as string;
+    // Gunakan eth_sendTransaction dengan method ERC20 transfer langsung jika payer == msg.sender
+    // Atau transferFrom jika spender di-approve
+    const isDirectTransfer = wallet.address.toLowerCase() === scannedData.payerAddress.toLowerCase();
+    
+    // Encode transfer(to, amount) biasa jika langsung, atau transferFrom jika lewat penerima
+    const dataHex = isDirectTransfer 
+      ? "0xa9059cbb" + scannedData.payerAddress.toLowerCase().replace("0x", "").padStart(64, "0") + BigInt(scannedData.totalAmount).toString(16).padStart(64, "0")
+      : encodeTransferFrom(scannedData.payerAddress, wallet.address, scannedData.totalAmount);
 
-      await new Promise((r) => setTimeout(r, 4000));
+    const txHash = (await provider.request({
+      method: "eth_sendTransaction",
+      params: [{
+        from: wallet.address,
+        to: USDC_ADDRESS,
+        data: dataHex,
+      }],
+    })) as string;
 
-      const receipt = await provider.request({
-        method: "eth_getTransactionReceipt",
-        params: [txHash],
-      }) as { blockHash: string; blockNumber: string; status: string } | null;
+    // Tunggu receipt untuk konfirmasi On-Chain
+    await new Promise((r) => setTimeout(r, 4000));
 
-      const tx: Transaction = {
-        id: generateNonce(),
-        payer_address: scannedData.payerAddress,
-        payee_address: wallet.address,
-        amount: parseFloat(scannedData.totalAmount) / 1_000_000,
-        category: scannedData.category,
-        items: scannedData.items,
-        tx_hash: txHash,
-        block_hash: receipt?.blockHash || "",
-        block_number: receipt ? parseInt(receipt.blockNumber, 16) : 0,
-        // Kalau receipt sudah ada tapi status-nya BUKAN "0x1", itu berarti
-        // transaksinya di-mining tapi REVERT (gagal di smart contract) —
-        // ini harus ditandai "failed", bukan disamakan dengan "pending"
-        // (yang harusnya cuma untuk transaksi yang belum ke-mining sama sekali).
-        status: !receipt
-          ? "pending"
-          : receipt.status === "0x1"
-          ? "confirmed"
-          : "failed",
-        mode: "receive",
-        created_at: new Date().toISOString(),
-        nonce: scannedData.nonce,
-      };
+    const receipt = (await provider.request({
+      method: "eth_getTransactionReceipt",
+      params: [txHash],
+    })) as { blockHash: string; blockNumber: string; status: string } | null;
 
-      await saveTransaction(tx);
-      setSuccessTx(tx);
-      setScannedData(null);
-      setScanInput("");
-    } catch (err) {
-      setError((err as Error).message || t("payment.error.transferFailed"));
-    } finally {
-      setTransferring(false);
+    // Cek apakah transaksi berhasil (0x1 = SUCCESS, 0x0 = REVERT/FAILED)
+    const isSuccess = receipt?.status === "0x1";
+
+    const tx: Transaction = {
+      id: generateNonce(),
+      payer_address: scannedData.payerAddress,
+      payee_address: wallet.address,
+      amount: parseFloat(scannedData.totalAmount) / 1_000_000,
+      category: scannedData.category,
+      items: scannedData.items,
+      tx_hash: txHash,
+      block_hash: receipt?.blockHash || "",
+      block_number: receipt ? parseInt(receipt.blockNumber, 16) : 0,
+      status: !receipt ? "pending" : isSuccess ? "confirmed" : "failed",
+      mode: "receive",
+      created_at: new Date().toISOString(),
+      nonce: scannedData.nonce,
+    };
+
+    if (!isSuccess) {
+      throw new Error("Transaksi gagal di-mining On-Chain (Contract Reverted). Cek saldo USDC atau Allowance!");
     }
-  };
+
+    await saveTransaction(tx);
+    setSuccessTx(tx);
+    setScannedData(null);
+    setScanInput("");
+  } catch (err) {
+    setError((err as Error).message || t("payment.error.transferFailed"));
+  } finally {
+    setTransferring(false);
+  }
+};
 
   const copyQR = () => {
     if (qrRaw) navigator.clipboard.writeText(qrRaw);
@@ -525,7 +531,6 @@ export default function PaymentPage() {
           ) : (
             <div className="rounded-2xl border border-ink-line/40 bg-ink p-8 text-center">
               <div className="mx-auto w-full max-w-xs">
-               /* KODE BARU LENGKAP: */
                   <div className="relative mx-auto aspect-square w-full max-w-[280px] rounded-xl bg-white p-4 flex items-center justify-center">
                     <QRCodeSVG
                       value={qrRaw}

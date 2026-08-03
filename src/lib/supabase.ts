@@ -82,21 +82,29 @@ export async function saveTransaction(tx: Transaction): Promise<void> {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(existing));
 }
 
+// Perbaikan fungsi getTransactions di src/lib/supabase.ts:
 export async function getTransactions(address: string): Promise<Transaction[]> {
+  const normalizedAddr = address.toLowerCase();
+
   if (supabase) {
     const { data, error } = await supabase
       .from("transactions")
       .select("*")
-      .or(`payer_address.eq.${address},payee_address.eq.${address}`)
+      .or(`payer_address.ilike.${normalizedAddr},payee_address.ilike.${normalizedAddr}`)
       .order("created_at", { ascending: false });
+
     if (error) throw error;
     return data || [];
   }
+
   // Fallback localStorage
   return getLocalTransactions().filter(
-    (t) => t.payer_address === address || t.payee_address === address
+    (t) =>
+      t.payer_address.toLowerCase() === normalizedAddr ||
+      t.payee_address.toLowerCase() === normalizedAddr
   );
 }
+
 
 export async function getTransactionByTxHash(txHash: string): Promise<Transaction | null> {
   if (supabase) {

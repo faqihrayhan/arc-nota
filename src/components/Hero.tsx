@@ -5,6 +5,8 @@ import { WalletButton } from "@/components/WalletButton";
 import { useLanguage } from "@/context/LanguageContext";
 import { cn } from "@/lib/utils";
 import { ArrowRight, Sparkles, Receipt } from "lucide-react";
+import Link from "next/link";
+  
 
 const QR_PATTERN = [
   1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0,
