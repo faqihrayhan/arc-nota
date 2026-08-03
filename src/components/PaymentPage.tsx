@@ -27,6 +27,8 @@ import {
   ExternalLink,
   Wallet,
 } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
+
 
 const CATEGORIES = [
   { id: "makan", icon: "🍽️" },
@@ -523,27 +525,18 @@ export default function PaymentPage() {
           ) : (
             <div className="rounded-2xl border border-ink-line/40 bg-ink p-8 text-center">
               <div className="mx-auto w-full max-w-xs">
-                <div className="relative mx-auto aspect-square w-full max-w-[280px] rounded-xl bg-white p-4">
-                  <div className="grid h-full w-full" style={{ gridTemplateColumns: "repeat(16, 1fr)", gap: "1px" }}>
-                    {Array.from({ length: 256 }).map((_, i) => {
-                      const filled = qrRaw.charCodeAt(i % Math.max(qrRaw.length, 1)) % 2 === 0;
-                      return (
-                        <span
-                          key={i}
-                          className={cn(
-                            "aspect-square rounded-[1px]",
-                            filled ? "bg-paper-ink" : "bg-transparent"
-                          )}
-                        />
-                      );
-                    })}
-                  </div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white shadow-lg">
-                      <span className="font-display text-lg font-bold text-paper-ink">N</span>
+               /* KODE BARU LENGKAP: */
+                  <div className="relative mx-auto aspect-square w-full max-w-[280px] rounded-xl bg-white p-4 flex items-center justify-center">
+                    <QRCodeSVG
+                      value={qrRaw}
+                      size={240}
+                      bgColor={"#FFFFFF"}
+                      fgColor={"#000000"}
+                      level={"M"}
+                      includeMargin={false}
+                     />
                     </div>
-                  </div>
-                </div>
+
 
                 <div className="mt-4 flex items-center justify-center gap-2 text-sm text-text-muted">
                   <Clock className="h-4 w-4" />
