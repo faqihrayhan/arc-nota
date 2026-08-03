@@ -74,8 +74,8 @@ export default function AnalisaPage() {
 
    const currentAddr = (wallet.address || "").toLowerCase();
   const periodStart = getPeriodStart(period);
-  
-  // Tambahin filter: Cuma ambil transaksi kalau wallet ini adalah PENGIRIM (payer_address)
+
+  // Hanya memfilter transaksi pengeluaran (di mana wallet aktif bertindak sebagai payer_address)
   const filtered = transactions.filter((t) => {
     const isPayer = t.payer_address.toLowerCase() === currentAddr;
     const isWithinPeriod = new Date(t.created_at) >= periodStart;
