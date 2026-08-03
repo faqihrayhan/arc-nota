@@ -72,11 +72,44 @@ export default function AnalisaPage() {
       .catch(() => setLoading(false));
   }, [wallet.address]);
 
-   const currentAddr = (wallet.address || "").toLowerCase();
+   // Demo Data jika wallet belum terhubung
+  const DEMO_TRANSACTIONS: Transaction[] = [
+    {
+      id: "demo-1",
+      payer_address: "0xdemo...1234",
+      payee_address: "0xshop...5678",
+      amount: 4.5,
+      category: "makan",
+      items: [{ name: "Ramen Special", price: 4.5 }],
+      tx_hash: "0xdemo...tx1",
+      block_hash: "",
+      block_number: 55000000,
+      status: "confirmed",
+      mode: "payment",
+      created_at: new Date().toISOString(),
+    },
+    {
+      id: "demo-2",
+      payer_address: "0xdemo...1234",
+      payee_address: "0xstore...9999",
+      amount: 12.0,
+      category: "belanja",
+      items: [{ name: "Kemeja Casual", price: 12.0 }],
+      tx_hash: "0xdemo...tx2",
+      block_hash: "",
+      block_number: 55000001,
+      status: "confirmed",
+      mode: "payment",
+      created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
+    },
+  ];
+
+  const activeTransactions = wallet.address ? transactions : DEMO_TRANSACTIONS;
+  const currentAddr = (wallet.address || "0xdemo...1234").toLowerCase();
   const periodStart = getPeriodStart(period);
 
-  // Hanya memfilter transaksi pengeluaran (di mana wallet aktif bertindak sebagai payer_address)
-  const filtered = transactions.filter((t) => {
+  // Filter transaksi berdasarkan wallet aktif & rentang waktu
+  const filtered = activeTransactions.filter((t) => {
     const isPayer = t.payer_address.toLowerCase() === currentAddr;
     const isWithinPeriod = new Date(t.created_at) >= periodStart;
     return isPayer && isWithinPeriod;
@@ -100,17 +133,6 @@ export default function AnalisaPage() {
   const sortedDays = Object.entries(byDay).sort(([a], [b]) => a.localeCompare(b));
   const maxDayValue = Math.max(...Object.values(byDay), 1);
 
-  if (!wallet.address) {
-    return (
-      <section className="relative mx-auto max-w-4xl px-5 py-24">
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-ink-line/40 bg-ink-2/30 p-12 text-center">
-          <Wallet className="h-12 w-12 text-text-muted" />
-          <h2 className="mt-4 font-display text-xl font-semibold">{t("analisa.connectFirst")}</h2>
-          <p className="mt-2 text-sm text-text-muted">{t("analisa.connectDesc")}</p>
-        </div>
-      </section>
-    );
-  }
 
   return (
     <section className="relative mx-auto max-w-4xl px-5 py-12">

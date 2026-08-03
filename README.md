@@ -1,4 +1,4 @@
-# Arc Nota
+# Nota
 
 <p align="center">
   <img src="https://img.shields.io/badge/Built%20on-Arc%20Testnet-4E7FE0?style=flat-square" alt="Built on Arc Testnet" />
