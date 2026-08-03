@@ -251,7 +251,7 @@ export default function PaymentPage() {
     setScannedData(data);
   };
 
-// Ganti fungsi handleTransferFrom dengan versi aman ini:
+// Ganti fungsi handleTransferFrom di src/components/PaymentPage.tsx dengan versi aman ini:
 const handleTransferFrom = async () => {
   if (!scannedData || !wallet.address) return;
   setError("");
@@ -261,25 +261,29 @@ const handleTransferFrom = async () => {
     const provider = resolveProvider(wallet.walletId!);
     if (!provider) throw new Error("Provider wallet tidak ditemukan");
 
-    // Gunakan eth_sendTransaction dengan method ERC20 transfer langsung jika payer == msg.sender
-    // Atau transferFrom jika spender di-approve
-    const isDirectTransfer = wallet.address.toLowerCase() === scannedData.payerAddress.toLowerCase();
-    
-    // Encode transfer(to, amount) biasa jika langsung, atau transferFrom jika lewat penerima
-    const dataHex = isDirectTransfer 
-      ? "0xa9059cbb" + scannedData.payerAddress.toLowerCase().replace("0x", "").padStart(64, "0") + BigInt(scannedData.totalAmount).toString(16).padStart(64, "0")
-      : encodeTransferFrom(scannedData.payerAddress, wallet.address, scannedData.totalAmount);
+    const payeeAddress = wallet.address.toLowerCase();
+    const totalUnits = BigInt(scannedData.totalAmount); // 6 decimals USDC uint256
 
+    // Encode method ERC-20 transfer(to, amount)
+    // Function Selector: 0xa9059cbb
+    const fnSelector = "0xa9059cbb";
+    const paddedTo = payeeAddress.replace("0x", "").padStart(64, "0");
+    const paddedAmount = totalUnits.toString(16).padStart(64, "0");
+    const dataHex = fnSelector + paddedTo + paddedAmount;
+
+    // Send Transaction ERC-20 Direct Transfer From Wallet Payer to Recipient
     const txHash = (await provider.request({
       method: "eth_sendTransaction",
-      params: [{
-        from: wallet.address,
-        to: USDC_ADDRESS,
-        data: dataHex,
-      }],
+      params: [
+        {
+          from: wallet.address,
+          to: USDC_ADDRESS,
+          data: dataHex,
+        },
+      ],
     })) as string;
 
-    // Tunggu receipt untuk konfirmasi On-Chain
+    // wait receipt On-Chain from Arc Testnet (4 detik)
     await new Promise((r) => setTimeout(r, 4000));
 
     const receipt = (await provider.request({
@@ -287,29 +291,30 @@ const handleTransferFrom = async () => {
       params: [txHash],
     })) as { blockHash: string; blockNumber: string; status: string } | null;
 
-    // Cek apakah transaksi berhasil (0x1 = SUCCESS, 0x0 = REVERT/FAILED)
+    // Check status receipt (0x1 = SUCCESS, 0x0 = REVERT)
     const isSuccess = receipt?.status === "0x1";
+
+    if (!isSuccess) {
+      throw new Error("Transaksi gagal di-mining On-Chain (Reverted). Pastikan saldo USDC di wallet mencukupi!");
+    }
 
     const tx: Transaction = {
       id: generateNonce(),
-      payer_address: scannedData.payerAddress,
-      payee_address: wallet.address,
+      payer_address: wallet.address.toLowerCase(),
+      payee_address: scannedData.payerAddress.toLowerCase(),
       amount: parseFloat(scannedData.totalAmount) / 1_000_000,
       category: scannedData.category,
       items: scannedData.items,
       tx_hash: txHash,
       block_hash: receipt?.blockHash || "",
       block_number: receipt ? parseInt(receipt.blockNumber, 16) : 0,
-      status: !receipt ? "pending" : isSuccess ? "confirmed" : "failed",
+      status: "confirmed",
       mode: "receive",
       created_at: new Date().toISOString(),
       nonce: scannedData.nonce,
     };
 
-    if (!isSuccess) {
-      throw new Error("Transaksi gagal di-mining On-Chain (Contract Reverted). Cek saldo USDC atau Allowance!");
-    }
-
+    // Save to Supabase realtime sync
     await saveTransaction(tx);
     setSuccessTx(tx);
     setScannedData(null);
@@ -320,6 +325,7 @@ const handleTransferFrom = async () => {
     setTransferring(false);
   }
 };
+
 
   const copyQR = () => {
     if (qrRaw) navigator.clipboard.writeText(qrRaw);
