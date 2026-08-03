@@ -55,11 +55,11 @@ export function Hero() {
 
           <div className={cn("mt-8 flex flex-wrap items-center gap-3 transition-all duration-1000 delay-400", isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6")}>
             <WalletButton />
-            <a href="/#how-it-works" className="group inline-flex items-center gap-2 rounded-full border border-ink-line/60 bg-ink-2/50 px-5 py-2.5 text-sm text-text transition-all duration-300 hover:border-text-muted hover:bg-ink-2">
+            <Link href="/#how-it-works" className="group inline-flex items-center gap-2 rounded-full border border-ink-line/60 bg-ink-2/50 px-5 py-2.5 text-sm text-text transition-all duration-300 hover:border-text-muted hover:bg-ink-2">
               <Receipt className="h-4 w-4 text-text-muted transition-colors group-hover:text-text" />
               {t("hero.ctaSecondary")}
               <ArrowRight className="h-3.5 w-3.5 text-text-muted transition-all duration-300 group-hover:text-text group-hover:translate-x-0.5" />
-            </a>
+            </Link>
           </div>
 
           <p className={cn("mt-5 font-mono text-xs text-text-faint transition-all duration-1000 delay-500", isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4")}>

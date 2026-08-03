@@ -71,13 +71,13 @@ export function Nav() {
 
         <nav className="hidden items-center gap-0.5 md:flex">
           {/* How it works — scroll ke section */}
-          <a
+          <Link
             href="/#how-it-works"
             className="relative px-4 py-2 text-sm rounded-xl transition-all duration-300 group flex items-center gap-2 text-text-muted hover:text-text hover:bg-white/[0.03]"
           >
             <Layers className="h-4 w-4" />
             <span className="relative z-10">{t("nav.howItWorks")}</span>
-          </a>
+          </Link>
 
           {/* Features Dropdown */}
           <div className="relative" ref={featuresRef}>
@@ -99,7 +99,7 @@ export function Nav() {
             >
               <div className="p-2">
                 {featureItems.map((item) => (
-                  <a
+                  <Link
                     key={item.title}
                     href={item.href}
                     onClick={() => setFeaturesOpen(false)}
@@ -113,7 +113,7 @@ export function Nav() {
                       <p className="mt-0.5 text-xs text-text-muted line-clamp-1">{item.desc}</p>
                     </div>
                     <ExternalLink className="mt-1 h-3.5 w-3.5 shrink-0 text-text-faint opacity-0 transition-all duration-200 group-hover:opacity-100 group-hover:text-text-muted" />
-                  </a>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -128,7 +128,7 @@ export function Nav() {
             <div className={cn("absolute top-full left-1/2 -translate-x-1/2 mt-3 w-72 overflow-hidden rounded-2xl border border-ink-line/60 bg-ink-2/95 backdrop-blur-2xl shadow-2xl shadow-black/40 transition-all duration-300 origin-top", docsOpen ? "opacity-100 scale-100 translate-y-0 pointer-events-auto" : "opacity-0 scale-95 -translate-y-2 pointer-events-none")}>
               <div className="p-2">
                 {docsItems.map((item) => (
-                  <a key={item.title} href={item.href} onClick={() => setDocsOpen(false)} className="group flex items-start gap-3 rounded-xl px-3 py-3 transition-all duration-200 hover:bg-white/[0.04]">
+                  <Link key={item.title} href={item.href} onClick={() => setDocsOpen(false)} className="group flex items-start gap-3 rounded-xl px-3 py-3 transition-all duration-200 hover:bg-white/[0.04]">
                     <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-ink-3 border border-ink-line/40 text-text-muted transition-all duration-200 group-hover:text-text group-hover:border-ink-line/60">
                       <item.icon className="h-4 w-4" />
                     </div>
@@ -140,7 +140,7 @@ export function Nav() {
                       <p className="mt-0.5 text-xs text-text-muted">{item.desc}</p>
                     </div>
                     <ExternalLink className="mt-1 h-3.5 w-3.5 shrink-0 text-text-faint opacity-0 transition-all duration-200 group-hover:opacity-100 group-hover:text-text-muted" />
-                  </a>
+                  </Link>
                 ))}
               </div>
               <div className="border-t border-ink-line/40 px-4 py-3">
@@ -174,28 +174,28 @@ export function Nav() {
       {/* Mobile menu */}
       <div className={cn("md:hidden overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]", menuOpen ? "max-h-[700px] opacity-100" : "max-h-0 opacity-0")}>
         <div className="border-t border-ink-line/40 px-5 py-5 space-y-1">
-          <a href="/#how-it-works" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm rounded-xl text-text-muted hover:text-text hover:bg-white/[0.03] transition-all duration-300">
+          <Link href="/#how-it-works" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm rounded-xl text-text-muted hover:text-text hover:bg-white/[0.03] transition-all duration-300">
             <Layers className="h-4 w-4 text-text-faint" />
             <span className="font-medium">{t("nav.howItWorks")}</span>
-          </a>
+          </Link>
 
           <div className="pt-2">
             <p className="px-4 py-2 text-[11px] font-mono uppercase tracking-wider text-text-faint">{t("nav.features")}</p>
             {featureItems.map((item) => (
-              <a key={item.title} href={item.href} onClick={() => setMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-muted hover:text-text hover:bg-white/[0.03] rounded-xl transition-all duration-200">
+              <Link key={item.title} href={item.href} onClick={() => setMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-muted hover:text-text hover:bg-white/[0.03] rounded-xl transition-all duration-200">
                 <item.icon className="h-4 w-4 text-text-faint" />
                 <span>{item.title}</span>
-              </a>
+              </Link>
             ))}
           </div>
 
           <div className="pt-2">
             <p className="px-4 py-2 text-[11px] font-mono uppercase tracking-wider text-text-faint">Documentation</p>
             {docsItems.map((item) => (
-              <a key={item.title} href={item.href} onClick={() => setMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-muted hover:text-text hover:bg-white/[0.03] rounded-xl transition-all duration-200">
+              <Link key={item.title} href={item.href} onClick={() => setMenuOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-muted hover:text-text hover:bg-white/[0.03] rounded-xl transition-all duration-200">
                 <item.icon className="h-4 w-4 text-text-faint" />
                 <span>{item.title}</span>
-              </a>
+              </Link>
             ))}
           </div>
           <div className="mt-4 pt-4 border-t border-ink-line/40 flex items-center gap-3">
