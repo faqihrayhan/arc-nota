@@ -251,7 +251,7 @@ export default function PaymentPage() {
     setScannedData(data);
   };
 
-// Ganti fungsi handleTransferFrom di src/components/PaymentPage.tsx dengan versi aman ini:
+// Perbaikan fungsi handleTransferFrom di src/components/PaymentPage.tsx sesuai docs.arc.io:
 const handleTransferFrom = async () => {
   if (!scannedData || !wallet.address) return;
   setError("");
@@ -261,29 +261,26 @@ const handleTransferFrom = async () => {
     const provider = resolveProvider(wallet.walletId!);
     if (!provider) throw new Error("Provider wallet tidak ditemukan");
 
-    const payeeAddress = wallet.address.toLowerCase();
-    const totalUnits = BigInt(scannedData.totalAmount); // 6 decimals USDC uint256
+    const payeeAddress = scannedData.payerAddress.toLowerCase(); // Alamat Penerima
 
-    // Encode method ERC-20 transfer(to, amount)
-    // Function Selector: 0xa9059cbb
-    const fnSelector = "0xa9059cbb";
-    const paddedTo = payeeAddress.replace("0x", "").padStart(64, "0");
-    const paddedAmount = totalUnits.toString(16).padStart(64, "0");
-    const dataHex = fnSelector + paddedTo + paddedAmount;
+    // Konversi jumlah dari QR (USDC) ke 18 Decimals (Wei) Native Arc USDC
+    // Misal: 1.00 USDC -> 1_000_000_000_000_000_000 Wei (10^18)
+    const amountInUsdc = parseFloat(scannedData.totalAmount) / 1_000_000;
+    const valueInWeiHex = "0x" + BigInt(Math.floor(amountInUsdc * 1e18)).toString(16);
 
-    // Send Transaction ERC-20 Direct Transfer From Wallet Payer to Recipient
+    // Kirim Native Transfer USDC langsung di Arc Chain
     const txHash = (await provider.request({
       method: "eth_sendTransaction",
       params: [
         {
           from: wallet.address,
-          to: USDC_ADDRESS,
-          data: dataHex,
+          to: payeeAddress,
+          value: valueInWeiHex, // Value Native USDC 18 decimals
         },
       ],
     })) as string;
 
-    // wait receipt On-Chain from Arc Testnet (4 detik)
+    // Tunggu receipt On-Chain dari Arc Testnet
     await new Promise((r) => setTimeout(r, 4000));
 
     const receipt = (await provider.request({
@@ -291,18 +288,17 @@ const handleTransferFrom = async () => {
       params: [txHash],
     })) as { blockHash: string; blockNumber: string; status: string } | null;
 
-    // Check status receipt (0x1 = SUCCESS, 0x0 = REVERT)
     const isSuccess = receipt?.status === "0x1";
 
     if (!isSuccess) {
-      throw new Error("Transaksi gagal di-mining On-Chain (Reverted). Pastikan saldo USDC di wallet mencukupi!");
+      throw new Error("Transaksi gagal di-mining On-Chain. Pastikan saldo USDC di wallet mencukupi!");
     }
 
     const tx: Transaction = {
       id: generateNonce(),
       payer_address: wallet.address.toLowerCase(),
-      payee_address: scannedData.payerAddress.toLowerCase(),
-      amount: parseFloat(scannedData.totalAmount) / 1_000_000,
+      payee_address: payeeAddress,
+      amount: amountInUsdc,
       category: scannedData.category,
       items: scannedData.items,
       tx_hash: txHash,
@@ -314,7 +310,6 @@ const handleTransferFrom = async () => {
       nonce: scannedData.nonce,
     };
 
-    // Save to Supabase realtime sync
     await saveTransaction(tx);
     setSuccessTx(tx);
     setScannedData(null);
@@ -325,6 +320,7 @@ const handleTransferFrom = async () => {
     setTransferring(false);
   }
 };
+
 
 
   const copyQR = () => {
