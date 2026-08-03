@@ -61,8 +61,13 @@ export default function AnalisaPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
 
+    const [expandedTx, setExpandedTx] = useState<string | null>(null);
+
   useEffect(() => {
-    if (!wallet.address) return;
+    if (!wallet.address) {
+      setLoading(false); // Matikan loading jika wallet belum terhubung (Demo Mode)
+      return;
+    }
     setLoading(true);
     getTransactions(wallet.address)
       .then((data) => {
@@ -71,6 +76,7 @@ export default function AnalisaPage() {
       })
       .catch(() => setLoading(false));
   }, [wallet.address]);
+
 
    // Demo Data jika wallet belum terhubung
     const DEMO_TRANSACTIONS: Transaction[] = [
@@ -253,28 +259,63 @@ export default function AnalisaPage() {
             </div>
           )}
 
-          <div className="rounded-2xl border border-ink-line/40 bg-ink p-6">
+                    <div className="rounded-2xl border border-ink-line/40 bg-ink p-6">
             <h3 className="font-display text-sm font-semibold">{t("analisa.recentTx")}</h3>
             <div className="mt-4 space-y-2">
-              {filtered.slice(0, 10).map((tx) => (
-                <div
-                  key={tx.id}
-                  className="flex items-center justify-between rounded-xl border border-ink-line/30 bg-ink-2/30 px-4 py-3 transition-colors hover:bg-ink-2/60"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={cn("flex h-9 w-9 items-center justify-center rounded-lg", CATEGORY_COLORS[tx.category] || "bg-text-muted", "bg-opacity-20")}>
-                      <Receipt className="h-4 w-4 text-text" />
+              {filtered.slice(0, 10).map((tx) => {
+                const isExpanded = expandedTx === tx.id;
+                return (
+                  <div
+                    key={tx.id}
+                    onClick={() => setExpandedTx(isExpanded ? null : tx.id)}
+                    className="cursor-pointer rounded-xl border border-ink-line/30 bg-ink-2/30 p-4 transition-all hover:border-ink-line/60 hover:bg-ink-2/60"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={cn("flex h-9 w-9 items-center justify-center rounded-lg", CATEGORY_COLORS[tx.category] || "bg-text-muted", "bg-opacity-20")}>
+                          <Receipt className="h-4 w-4 text-text" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium capitalize">{t(`payment.cat.${tx.category}`)}</p>
+                          <p className="text-xs text-text-faint font-mono">{formatDate(tx.created_at)}</p>
+                        </div>
+                      </div>
+                      <span className="font-mono text-sm font-medium">
+                        {tx.mode === "receive" ? "+" : "-"}{formatUSDC(tx.amount)} USDC
+                      </span>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium capitalize">{t(`payment.cat.${tx.category}`)}</p>
-                      <p className="text-xs text-text-faint font-mono">{formatDate(tx.created_at)}</p>
-                    </div>
+
+                    {/* Expandable Item Details & ArcScan Link */}
+                    {isExpanded && (
+                      <div className="mt-4 border-t border-ink-line/20 pt-3 text-xs">
+                        {tx.items && tx.items.length > 0 && (
+                          <div className="space-y-1 mb-3">
+                            <p className="font-medium text-text-muted mb-1">Rincian Catatan Nota:</p>
+                            {tx.items.map((item, idx) => (
+                              <div key={idx} className="flex justify-between text-text-muted">
+                                <span>• {item.name}</span>
+                                <span>{formatUSDC(item.price)} USDC</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {tx.tx_hash && !tx.tx_hash.startsWith("0xdemo") && (
+                          <a
+                            href={`https://testnet.arcscan.app/tx/${tx.tx_hash}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex items-center gap-1.5 text-accent hover:text-accent-strong transition-colors"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                            Cek Transaksi di ArcScan
+                          </a>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  <span className="font-mono text-sm font-medium">
-                    {tx.mode === "receive" ? "+" : "-"}{formatUSDC(tx.amount)} USDC
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
