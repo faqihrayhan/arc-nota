@@ -14,7 +14,9 @@ import {
   ArrowDownRight,
   Wallet,
   Loader2,
+  ExternalLink,
 } from "lucide-react";
+
 
 type Period = "week" | "month" | "all";
 
@@ -61,11 +63,11 @@ export default function AnalisaPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
 
-    const [expandedTx, setExpandedTx] = useState<string | null>(null);
+   const [expandedTx, setExpandedTx] = useState<string | null>(null);
 
   useEffect(() => {
     if (!wallet.address) {
-      setLoading(false); // Matikan loading jika wallet belum terhubung (Demo Mode)
+      setLoading(false); // Langsung matikan loading jika wallet disconnect
       return;
     }
     setLoading(true);
@@ -77,9 +79,8 @@ export default function AnalisaPage() {
       .catch(() => setLoading(false));
   }, [wallet.address]);
 
-
-   // Demo Data jika wallet belum terhubung
-    const DEMO_TRANSACTIONS: Transaction[] = [
+  // Demo Data jika wallet belum terhubung
+  const DEMO_TRANSACTIONS: Transaction[] = [
     {
       id: "demo-1",
       payer_address: "0xdemo...1234",
@@ -110,17 +111,18 @@ export default function AnalisaPage() {
     },
   ];
 
-
-  const activeTransactions = wallet.address ? transactions : DEMO_TRANSACTIONS;
-  const currentAddr = (wallet.address || "0xdemo...1234").toLowerCase();
+  const isConnected = Boolean(wallet.address);
+  const currentAddr = (wallet.address || "").toLowerCase();
   const periodStart = getPeriodStart(period);
 
-  // Filter transaksi berdasarkan wallet aktif & rentang waktu
-  const filtered = activeTransactions.filter((t) => {
-    const isPayer = t.payer_address.toLowerCase() === currentAddr;
-    const isWithinPeriod = new Date(t.created_at) >= periodStart;
-    return isPayer && isWithinPeriod;
-  });
+  // Jika wallet terhubung, filter berdasarkan address. Jika disconnect, tampilkan DEMO_TRANSACTIONS.
+  const filtered = isConnected
+    ? transactions.filter((t) => {
+        const isPayer = t.payer_address.toLowerCase() === currentAddr;
+        const isWithinPeriod = new Date(t.created_at) >= periodStart;
+        return isPayer && isWithinPeriod;
+      })
+    : DEMO_TRANSACTIONS;
 
   const byCategory = filtered.reduce((acc, tx) => {
     const cat = tx.category || "lainnya";
@@ -259,7 +261,7 @@ export default function AnalisaPage() {
             </div>
           )}
 
-                    <div className="rounded-2xl border border-ink-line/40 bg-ink p-6">
+                  <div className="rounded-2xl border border-ink-line/40 bg-ink p-6">
             <h3 className="font-display text-sm font-semibold">{t("analisa.recentTx")}</h3>
             <div className="mt-4 space-y-2">
               {filtered.slice(0, 10).map((tx) => {
@@ -285,31 +287,35 @@ export default function AnalisaPage() {
                       </span>
                     </div>
 
-                    {/* Expandable Item Details & ArcScan Link */}
+                    {/* Expand Rincian Item Belanjaan & Link ArcScan */}
                     {isExpanded && (
-                      <div className="mt-4 border-t border-ink-line/20 pt-3 text-xs">
+                      <div className="mt-4 border-t border-ink-line/20 pt-3 text-xs space-y-3">
                         {tx.items && tx.items.length > 0 && (
-                          <div className="space-y-1 mb-3">
-                            <p className="font-medium text-text-muted mb-1">Rincian Catatan Nota:</p>
-                            {tx.items.map((item, idx) => (
-                              <div key={idx} className="flex justify-between text-text-muted">
-                                <span>• {item.name}</span>
-                                <span>{formatUSDC(item.price)} USDC</span>
-                              </div>
-                            ))}
+                          <div>
+                            <p className="font-medium text-text-muted mb-1.5">Rincian Item Nota:</p>
+                            <div className="space-y-1">
+                              {tx.items.map((item, idx) => (
+                                <div key={idx} className="flex justify-between text-text-muted">
+                                  <span>• {item.name}</span>
+                                  <span className="font-mono">{formatUSDC(item.price)} USDC</span>
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         )}
-                        {tx.tx_hash && !tx.tx_hash.startsWith("0xdemo") && (
-                          <a
-                            href={`https://testnet.arcscan.app/tx/${tx.tx_hash}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="inline-flex items-center gap-1.5 text-accent hover:text-accent-strong transition-colors"
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                            Cek Transaksi di ArcScan
-                          </a>
+                        {tx.tx_hash && (
+                          <div className="pt-1">
+                            <a
+                              href={`https://testnet.arcscan.app/tx/${tx.tx_hash}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="inline-flex items-center gap-1.5 font-mono text-accent hover:text-accent-strong transition-colors"
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                              <span>Cek On-Chain di ArcScan ↗️</span>
+                            </a>
+                          </div>
                         )}
                       </div>
                     )}
