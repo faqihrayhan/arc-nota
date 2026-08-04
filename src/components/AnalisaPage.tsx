@@ -287,12 +287,12 @@ export default function AnalisaPage() {
                       </span>
                     </div>
 
-                    {/* Expand Rincian Item Belanjaan & Link ArcScan */}
+                                     {/* Expand Rincian Item Belanjaan & Link ArcScan */}
                     {isExpanded && (
                       <div className="mt-4 border-t border-ink-line/20 pt-3 text-xs space-y-3">
                         {tx.items && tx.items.length > 0 && (
                           <div>
-                            <p className="font-medium text-text-muted mb-1.5">Rincian Item Nota:</p>
+                            <p className="font-medium text-text-muted mb-1.5">{t("analisa.itemDetails")}</p>
                             <div className="space-y-1">
                               {tx.items.map((item, idx) => (
                                 <div key={idx} className="flex justify-between text-text-muted">
@@ -313,7 +313,7 @@ export default function AnalisaPage() {
                               className="inline-flex items-center gap-1.5 font-mono text-accent hover:text-accent-strong transition-colors"
                             >
                               <ExternalLink className="h-3 w-3" />
-                              <span>Cek On-Chain di ArcScan ↗️</span>
+                              <span>{t("analisa.viewArcScan")}</span>
                             </a>
                           </div>
                         )}

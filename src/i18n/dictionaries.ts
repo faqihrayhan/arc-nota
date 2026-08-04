@@ -119,6 +119,9 @@ export const dictionaries: Record<Locale, Record<string, string>> = {
     "analisa.dailyTrend": "Tren Harian",
     "analisa.recentTx": "Transaksi Terbaru",
     "analisa.connectFirst": "Connect Wallet Dulu",
+    "analisa.itemDetails": "Rincian Item Nota:",
+    "analisa.viewArcScan": "Cek On-Chain di ArcScan ↗️",
+
     "analisa.connectDesc": "Hubungkan wallet untuk melihat analisa keuanganmu.",
 
     "forecast.eyebrow": "Proyeksi Keuangan",
@@ -310,6 +313,9 @@ export const dictionaries: Record<Locale, Record<string, string>> = {
     "analisa.dailyTrend": "Daily Trend",
     "analisa.recentTx": "Recent Transactions",
     "analisa.connectFirst": "Connect Wallet First",
+    "analisa.itemDetails": "Receipt Item Details:",
+    "analisa.viewArcScan": "Check On-Chain on ArcScan ↗️",
+
     "analisa.connectDesc": "Connect your wallet to see your financial analysis.",
 
     "forecast.eyebrow": "Financial Projection",
