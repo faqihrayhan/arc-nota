@@ -159,7 +159,9 @@ export function Nav() {
           <div className="flex items-center rounded-xl border border-ink-line/40 p-0.5"><LanguageToggle /></div>
           <div className="flex items-center"><ThemeToggle /></div>
           <div className="w-px h-6 bg-ink-line/40 mx-0.5" />
-          <div className="flex items-center"><WalletButton /></div>
+            <div className="flex items-center gap-2"> <WalletButton />
+          </div>
+
         </div>
 
         <button onClick={() => setMenuOpen((v) => !v)} aria-label={menuOpen ? "Tutup menu" : "Buka menu"} aria-expanded={menuOpen} className="md:hidden flex h-10 w-10 items-center justify-center rounded-xl border border-ink-line/60 hover:border-ink-line hover:bg-white/[0.03] transition-all duration-300">

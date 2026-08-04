@@ -43,17 +43,17 @@ function resolveProvider(id: WalletId): Eip1193Provider | undefined {
   if (typeof window === "undefined") return undefined;
 
   if (id === "okx") {
-    return window.okxwallet?.ethereum ?? window.okxwallet;
+    return window.okxwallet?.ethereum ?? window.okxwallet ?? window.ethereum;
   }
 
-  // id === "metamask"
   const eth = window.ethereum;
   if (!eth) return undefined;
   if (Array.isArray(eth.providers)) {
-    return eth.providers.find((p) => p.isMetaMask) ?? undefined;
+    return eth.providers.find((p) => p.isMetaMask) ?? eth.providers[0] ?? undefined;
   }
-  return eth.isMetaMask ? eth : undefined;
+  return eth.isMetaMask ? eth : eth;
 }
+
 
 function isMobileUserAgent() {
   if (typeof navigator === "undefined") return false;
