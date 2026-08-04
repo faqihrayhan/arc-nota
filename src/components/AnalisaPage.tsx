@@ -87,7 +87,7 @@ export default function AnalisaPage() {
       payee_address: "0xshop...5678",
       amount: 4.5,
       category: "makan",
-      items: [{ name: "Ramen Special", price: 4.5 }],
+      items: [{ name: "Ramen Special", price: -4.5 }],
       tx_hash: "0xdemo...tx1",
       block_hash: "",
       block_number: 55000000,
@@ -101,7 +101,7 @@ export default function AnalisaPage() {
       payee_address: "0xstore...9999",
       amount: 12.0,
       category: "belanja",
-      items: [{ name: "Kemeja Casual", price: 12.0 }],
+      items: [{ name: "Kemeja Casual", price: -12.0 }],
       tx_hash: "0xdemo...tx2",
       block_hash: "",
       block_number: 55000001,
@@ -238,29 +238,6 @@ export default function AnalisaPage() {
             </div>
           </div>
 
-          {sortedDays.length > 1 && (
-            <div className="rounded-2xl border border-ink-line/40 bg-ink p-6">
-              <h3 className="font-display text-sm font-semibold">{t("analisa.dailyTrend")}</h3>
-              <div className="mt-4 flex items-end gap-1 h-32">
-                {sortedDays.map(([day, amount]) => {
-                  const height = Math.max(4, (amount / maxDayValue) * 100);
-                  return (
-                    <div key={day} className="flex-1 flex flex-col items-center gap-1">
-                      <div
-                        className="w-full rounded-t bg-accent/60 hover:bg-accent transition-colors"
-                        style={{ height: `${height}%` }}
-                        title={`${day}: ${formatUSDC(amount)} USDC`}
-                      />
-                      <span className="text-[9px] text-text-faint font-mono">
-                        {day.slice(5)}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
                   <div className="rounded-2xl border border-ink-line/40 bg-ink p-6">
             <h3 className="font-display text-sm font-semibold">{t("analisa.recentTx")}</h3>
             <div className="mt-4 space-y-2">
@@ -282,9 +259,10 @@ export default function AnalisaPage() {
                           <p className="text-xs text-text-faint font-mono">{formatDate(tx.created_at)}</p>
                         </div>
                       </div>
-                      <span className="font-mono text-sm font-medium">
-                        {tx.mode === "receive" ? "+" : "-"}{formatUSDC(tx.amount)} USDC
+                       <span className="font-mono text-sm font-medium">
+                        {tx.payer_address.toLowerCase() === currentAddr ? "-" : "+"}{formatUSDC(tx.amount)} USDC
                       </span>
+
                     </div>
 
                                      {/* Expand Rincian Item Belanjaan & Link ArcScan */}
