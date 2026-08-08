@@ -121,7 +121,7 @@ export const dictionaries: Record<Locale, Record<string, string>> = {
     "analisa.recentTx": "Transaksi Terbaru",
     "analisa.connectFirst": "Connect Wallet Dulu",
     "analisa.itemDetails": "Rincian Item Nota:",
-    "analisa.viewArcScan": "Cek On-Chain di ArcScan ↗️",
+    "analisa.viewArcScan": "Cek On-Chain di ArcScan",
     "analisa.viewReceipt": "Lihat Receipt",
 
     "analisa.connectDesc": "Hubungkan wallet untuk melihat analisa keuanganmu.",
@@ -140,7 +140,7 @@ export const dictionaries: Record<Locale, Record<string, string>> = {
     "receipt.onChain": "Tercatat On-Chain",
     "receipt.downloadPdf": "Download PDF",
     "receipt.downloadPng": "Download PNG",
-    "receipt.viewOnArcScan": "Lihat di ArcScan ↗",
+    "receipt.viewOnArcScan": "Lihat di ArcScan",
 
     "export.title": "Export Laporan CSV",
     "export.from": "Dari tanggal",
@@ -198,7 +198,7 @@ export const dictionaries: Record<Locale, Record<string, string>> = {
     "wallet.noProviderMobile": "Buka situs ini lewat browser bawaan di aplikasi wallet kamu (mis. browser dalam app MetaMask/OKX) untuk ganti jaringan.",
     "wallet.switchFailed": "Gagal ganti jaringan. Coba lagi lewat aplikasi wallet kamu.",
     "wallet.connectedVia": "Terhubung via",
-    "wallet.viewExplorer": "Lihat di ArcScan ↗",
+    "wallet.viewExplorer": "Lihat di ArcScan",
     "wallet.disconnect": "Putuskan koneksi",
     "wallet.switchNetwork": "Ganti ke Arc Testnet",
 
@@ -354,7 +354,7 @@ export const dictionaries: Record<Locale, Record<string, string>> = {
     "analisa.recentTx": "Recent Transactions",
     "analisa.connectFirst": "Connect Wallet First",
     "analisa.itemDetails": "Receipt Item Details:",
-    "analisa.viewArcScan": "Check On-Chain on ArcScan ↗️",
+    "analisa.viewArcScan": "Check On-Chain on ArcScan",
     "analisa.viewReceipt": "View Receipt",
 
     "analisa.connectDesc": "Connect your wallet to see your financial analysis.",
@@ -373,7 +373,7 @@ export const dictionaries: Record<Locale, Record<string, string>> = {
     "receipt.onChain": "Recorded On-Chain",
     "receipt.downloadPdf": "Download PDF",
     "receipt.downloadPng": "Download PNG",
-    "receipt.viewOnArcScan": "View on ArcScan ↗",
+    "receipt.viewOnArcScan": "View on ArcScan",
 
     "export.title": "Export CSV Report",
     "export.from": "From date",
@@ -431,7 +431,7 @@ export const dictionaries: Record<Locale, Record<string, string>> = {
     "wallet.noProviderMobile": "Open this site inside your wallet app's built-in browser (e.g. MetaMask/OKX in-app browser) to switch networks.",
     "wallet.switchFailed": "Couldn't switch networks. Try again from your wallet app.",
     "wallet.connectedVia": "Connected via",
-    "wallet.viewExplorer": "View on ArcScan ↗",
+    "wallet.viewExplorer": "View on ArcScan",
     "wallet.disconnect": "Disconnect",
     "wallet.switchNetwork": "Switch to Arc Testnet",
 

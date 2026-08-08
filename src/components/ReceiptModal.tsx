@@ -18,12 +18,15 @@ import {
 } from "lucide-react";
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleString("id-ID", {
+  // Receipt selalu pakai format English (en-US) — terlepas dari locale UI —
+  // supaya tampilannya konsisten & profesional di dokumen yang di-export.
+  return new Date(iso).toLocaleString("en-US", {
     day: "numeric",
     month: "long",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    hour12: false,
   });
 }
 
