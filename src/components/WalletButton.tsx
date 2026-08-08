@@ -212,12 +212,14 @@ export function WalletButton({ compact = false }: { compact?: boolean }) {
                 <a
                   key={w.id}
                   href={wallet.mobileDeepLink(w.id)}
+                  target="_blank"
+                  rel="noreferrer"
                   className="flex items-center gap-3 px-4 py-3 text-sm text-text transition-colors hover:bg-ink-3"
                 >
                   <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink-3 border border-ink-line/30 font-mono text-[10px]">
                     {w.monogram}
                   </span>
-                  <span>{t("wallet.openInApp")} {w.label}</span>
+                  <span className="font-medium">{t("wallet.openInApp")} {w.label}</span>
                 </a>
               );
             }
