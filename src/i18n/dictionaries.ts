@@ -19,6 +19,7 @@ export const dictionaries: Record<Locale, Record<string, string>> = {
     "hero.title2": "Tiap nota jadi wawasan.",
     "hero.desc":
       "Bayar pakai QR, catat otomatis on-chain, dan pahami ke mana uangmu pergi — lengkap dengan proyeksi bulan depan. Semuanya jalan di atas Arc, jaringan pembayaran stablecoin.",
+    "hero.ctaPrimary": "Bayar Sekarang",
     "hero.ctaSecondary": "Lihat fitur",
     "hero.chainNote": "Chain ID 5042002 · Gas dibayar pakai USDC",
     "hero.receipt.item1": "Kopi & roti",
@@ -252,6 +253,7 @@ export const dictionaries: Record<Locale, Record<string, string>> = {
     "hero.title2": "Every note becomes insight.",
     "hero.desc":
       "Pay with a QR code, get it logged on-chain automatically, and see where your money actually goes — plus a projection for next month. All running on Arc, the stablecoin payments network.",
+    "hero.ctaPrimary": "Pay Now",
     "hero.ctaSecondary": "See features",
     "hero.chainNote": "Chain ID 5042002 · Gas paid in USDC",
     "hero.receipt.item1": "Coffee & pastry",
