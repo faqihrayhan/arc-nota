@@ -9,7 +9,6 @@ import { ARC_EXPLORER_URL } from "@/lib/arc-chain";
 import { cn } from "@/lib/utils";
 import {
   X,
-  Download,
   FileText,
   Image as ImageIcon,
   Loader2,
@@ -18,8 +17,7 @@ import {
 } from "lucide-react";
 
 function formatDate(iso: string): string {
-  // Receipt selalu pakai format English (en-US) — terlepas dari locale UI —
-  // supaya tampilannya konsisten & profesional di dokumen yang di-export.
+  // Always English (en-US) format for official digital receipt
   return new Date(iso).toLocaleString("en-US", {
     day: "numeric",
     month: "long",
@@ -31,7 +29,7 @@ function formatDate(iso: string): string {
 }
 
 function formatUSDC(amount: number): string {
-  return amount.toLocaleString("id-ID", {
+  return amount.toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 6,
   });
@@ -48,13 +46,7 @@ function maskTxHash(hash: string): string {
 }
 
 /**
- * Digital receipt modal — bukti pembayaran on-chain yang bisa di-export
- * sebagai PDF atau PNG (via html-to-image + jsPDF, client-side only).
- *
- * Keamanan:
- * - Semua field yang di-render di-double-escape; wallet address di-mask
- *   sebagian (0x1234…abcd) sehingga tidak ada data sensitif penuh.
- * - Tidak ada fetch/network call — data hanya dari prop `tx`.
+ * Digital Receipt Modal — 100% English content for official export (PDF/PNG).
  */
 export default function ReceiptModal({
   tx,
@@ -70,7 +62,7 @@ export default function ReceiptModal({
   if (!tx) return null;
 
   const isPayer = tx.mode === "payment";
-  const directionLabel = isPayer ? t("receipt.from") : t("receipt.to");
+  const directionLabel = isPayer ? "From" : "To";
   const counterAddress = isPayer ? tx.payee_address : tx.payer_address;
   const amountSign = isPayer ? "-" : "+";
 
@@ -117,24 +109,24 @@ export default function ReceiptModal({
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label={t("receipt.title")}
+      aria-label="Digital Receipt"
     >
       <div
         className="max-h-[92vh] w-full max-w-md overflow-y-auto rounded-2xl border border-ink-line/40 bg-ink p-6 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="font-display text-lg font-semibold">{t("receipt.title")}</h3>
+          <h3 className="font-display text-lg font-semibold">Digital Receipt</h3>
           <button
             onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-lg border border-ink-line/40 text-text-muted transition-all hover:text-text hover:bg-ink-2"
-            aria-label={t("receipt.close")}
+            aria-label="Close"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        {/* ===== Area yang di-capture ke PDF/PNG ===== */}
+        {/* ===== Print Area (Captured to PDF/PNG) — 100% English ===== */}
         <div
           id="receipt-print-area"
           className="rounded-xl border border-ink-line/40 bg-white p-5 text-black"
@@ -147,32 +139,32 @@ export default function ReceiptModal({
               </p>
               <p className="mt-1 font-display text-lg font-bold tracking-tight">NOTA</p>
             </div>
-            <div className="rounded-md border-2 border-emerald-600 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-600">
-              {tx.status === "confirmed" ? t("receipt.paid") : tx.status}
+            <div className="rounded-md border-2 border-emerald-600 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-600">
+              {tx.status === "confirmed" ? "PAID" : tx.status.toUpperCase()}
             </div>
           </div>
 
           <div className="mt-4 space-y-2 border-t border-dashed border-neutral-300 pt-4 text-xs">
             <div className="flex justify-between">
-              <span className="text-neutral-500">{t("receipt.amount")}</span>
+              <span className="text-neutral-500">Amount</span>
               <span className="font-bold">
                 {amountSign} {formatUSDC(tx.amount)} USDC
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-neutral-500">{t("receipt.date")}</span>
+              <span className="text-neutral-500">Date</span>
               <span>{formatDate(tx.created_at)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-neutral-500">{t("receipt.category")}</span>
-              <span className="capitalize">{t(`payment.cat.${tx.category}`)}</span>
+              <span className="text-neutral-500">Category</span>
+              <span className="capitalize">{tx.category || "Others"}</span>
             </div>
             <div className="flex justify-between gap-4">
               <span className="shrink-0 text-neutral-500">{directionLabel}</span>
               <span className="break-all text-right font-mono">{maskAddress(counterAddress)}</span>
             </div>
             <div className="flex justify-between gap-4">
-              <span className="shrink-0 text-neutral-500">{t("receipt.txHash")}</span>
+              <span className="shrink-0 text-neutral-500">Tx Hash</span>
               <span className="break-all text-right font-mono">{maskTxHash(tx.tx_hash)}</span>
             </div>
           </div>
@@ -180,7 +172,7 @@ export default function ReceiptModal({
           {tx.items && tx.items.length > 0 && (
             <div className="mt-4 border-t border-dashed border-neutral-300 pt-3 text-xs">
               <p className="mb-1.5 font-semibold uppercase tracking-wider text-neutral-400">
-                {t("receipt.items")}
+                Items
               </p>
               <div className="space-y-1">
                 {tx.items.map((item, idx) => (
@@ -195,7 +187,7 @@ export default function ReceiptModal({
 
           <div className="mt-4 border-t-2 border-dashed border-neutral-300 pt-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-neutral-500">{t("receipt.total")}</span>
+              <span className="text-xs font-semibold text-neutral-500">Total</span>
               <span className="font-display text-lg font-bold">
                 {amountSign} {formatUSDC(tx.amount)} USDC
               </span>
@@ -203,7 +195,7 @@ export default function ReceiptModal({
           </div>
 
           <p className="mt-4 border-t border-dashed border-neutral-300 pt-3 text-center text-[9px] uppercase tracking-[0.25em] text-neutral-400">
-            {t("receipt.onChain")} · Arc Testnet
+            Recorded On-Chain · Arc Testnet
           </p>
         </div>
         {/* ===== End print area ===== */}
@@ -225,7 +217,7 @@ export default function ReceiptModal({
             ) : (
               <FileText className="h-4 w-4" />
             )}
-            {t("receipt.downloadPdf")}
+            Download PDF
           </button>
           <button
             onClick={downloadPng}
@@ -243,7 +235,7 @@ export default function ReceiptModal({
             ) : (
               <ImageIcon className="h-4 w-4" />
             )}
-            {t("receipt.downloadPng")}
+            Download PNG
           </button>
         </div>
 
@@ -254,7 +246,7 @@ export default function ReceiptModal({
           className="mt-4 flex items-center justify-center gap-1.5 text-xs text-accent hover:text-accent-strong transition-colors"
         >
           <ExternalLink className="h-3 w-3" />
-          {t("receipt.viewOnArcScan")}
+          View on ArcScan
         </a>
       </div>
     </div>

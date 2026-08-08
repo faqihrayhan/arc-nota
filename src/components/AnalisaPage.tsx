@@ -291,7 +291,7 @@ export default function AnalisaPage() {
                           </div>
                         )}
                         {tx.tx_hash && (
-                          <div className="pt-1">
+                          <div className="flex items-center justify-between pt-1">
                             <a
                               href={`https://testnet.arcscan.app/tx/${tx.tx_hash}`}
                               target="_blank"
@@ -307,7 +307,7 @@ export default function AnalisaPage() {
                                 e.stopPropagation();
                                 setReceiptTx(tx);
                               }}
-                              className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-ink-line/40 px-3 py-1.5 font-mono text-xs text-text-muted hover:border-accent/50 hover:text-accent transition-all"
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-ink-line/40 px-3 py-1.5 font-mono text-xs text-text-muted hover:border-accent/50 hover:text-accent transition-all"
                             >
                               <FileText className="h-3 w-3" />
                               <span>{t("analisa.viewReceipt")}</span>

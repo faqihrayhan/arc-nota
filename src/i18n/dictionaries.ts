@@ -123,7 +123,7 @@ export const dictionaries: Record<Locale, Record<string, string>> = {
     "analisa.connectFirst": "Connect Wallet Dulu",
     "analisa.itemDetails": "Rincian Item Nota:",
     "analisa.viewArcScan": "Cek On-Chain di ArcScan",
-    "analisa.viewReceipt": "Lihat Receipt",
+    "analisa.viewReceipt": "View Receipt",
 
     "analisa.connectDesc": "Hubungkan wallet untuk melihat analisa keuanganmu.",
 
