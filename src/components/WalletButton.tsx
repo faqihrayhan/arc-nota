@@ -192,15 +192,11 @@ export function WalletButton({ compact = false }: { compact?: boolean }) {
       {open && (
         <div
           className={cn(
-            "z-50 mt-2 overflow-hidden rounded-2xl border border-ink-line/50 bg-ink-2 shadow-2xl shadow-black/40",
-            // Di mode compact (dipakai di menu mobile), dropdown ini duduk
-            // di alur normal halaman (w-full, tanpa `absolute`) supaya
-            // tidak terpotong oleh parent yang punya `overflow-hidden`.
-            // Di desktop tetap melayang (`absolute`) di kanan tombol.
-            compact ? "relative w-full" : "absolute right-0 w-64"
+            "z-50 mt-2 overflow-hidden rounded-2xl border border-ink-line/60 bg-ink-2 shadow-2xl shadow-black/60 ring-1 ring-black/40",
+            compact ? "absolute left-0 right-0 w-full" : "absolute right-0 w-64"
           )}
         >
-          <div className="border-b border-ink-line/30 px-4 py-3">
+          <div className="border-b border-ink-line/30 bg-ink-2 px-4 py-3">
             <p className="text-[11px] uppercase tracking-wider text-text-faint">
               {t("wallet.pick")}
             </p>
@@ -214,7 +210,7 @@ export function WalletButton({ compact = false }: { compact?: boolean }) {
                   href={wallet.mobileDeepLink(w.id)}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-3 px-4 py-3 text-sm text-text transition-colors hover:bg-ink-3"
+                  className="flex items-center gap-3 bg-ink-2 px-4 py-3 text-sm text-text transition-colors hover:bg-ink-3"
                 >
                   <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink-3 border border-ink-line/30 font-mono text-[10px]">
                     {w.monogram}
@@ -243,7 +239,7 @@ export function WalletButton({ compact = false }: { compact?: boolean }) {
               <button
                 key={w.id}
                 onClick={() => handlePick(w.id)}
-                className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-text transition-colors hover:bg-ink-3"
+                className="flex w-full items-center gap-3 bg-ink-2 px-4 py-3 text-left text-sm text-text transition-colors hover:bg-ink-3"
               >
                 <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-ink-3 border border-ink-line/30 font-mono text-[10px]">
                   {w.monogram}

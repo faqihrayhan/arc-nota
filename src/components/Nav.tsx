@@ -175,7 +175,7 @@ export function Nav() {
 
       {/* Mobile menu */}
       <div className={cn("md:hidden overflow-y-auto transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]", menuOpen ? "max-h-[85vh] opacity-100" : "max-h-0 opacity-0")}>
-        <div className="border-t border-ink-line/40 px-5 py-5 space-y-1">
+        <div className="relative border-t border-ink-line/40 px-5 py-5 space-y-1">
           <Link href="/#how-it-works" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm rounded-xl text-text-muted hover:text-text hover:bg-white/[0.03] transition-all duration-300">
             <Layers className="h-4 w-4 text-text-faint" />
             <span className="font-medium">{t("nav.howItWorks")}</span>
